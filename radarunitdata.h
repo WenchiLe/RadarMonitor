@@ -43,8 +43,12 @@ public:
         int64_t time;
         int car_num;
         QVector<CarInfo> cars;
+        bool used;
     };
     QVector<Frame> queue_frame;
+
+private:
+    int index = 0;
 
 public:
     RadarUnitData();
@@ -56,6 +60,7 @@ public:
     int GetFrameCount();
     void UpdateMapLicense(int objID,QString license);
     QString GetLicense(int objID);
+    Frame GetNextProcessFrame();
 };
 
 #endif // RADARUNITDATA_H

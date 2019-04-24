@@ -15,7 +15,7 @@
 // Need to link with Ws2_32.lib
 #pragma comment (lib, "Ws2_32.lib")
 #define DEFAULT_BUFLEN 512
-#define DEFAULT_PORT "2048"
+#define DEFAULT_PORT "2045"
 
 class ReceiveLicensePlate : public QThread
 {
@@ -25,7 +25,7 @@ public:
     {
         double longtitude = 0.0;
         double latitude = 0.0;
-        int timeStamp = 0;
+        int64_t timeStamp = 0;
         char license[20];
     };
 

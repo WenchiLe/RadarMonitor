@@ -163,13 +163,14 @@ void MainWindow::paintEvent(QPaintEvent *)
 
 void MainWindow::NewFramesCome(ReceiveData::Frame60Bs frame60Bs)
 {
+    //std::cout<<frame60Bs.length<<std::endl;
     lastFrame60Bs = frame60Bs;
     update();
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {
-    if(event->button()==Qt::LeftButton) //鼠标左键按下
+    if(event->button()==Qt::LeftButton) //click the left button of mouse
     {
         //if(event->pos().x()<=(1570+pixmapLocation.x())&&event->pos().x()>=pixmapLocation.x()&&event->pos().y()<=(900+pixmapLocation.y())&&event->pos().y()>=pixmapLocation.y())
         if(flag_isIn_pixmap_Car)
@@ -208,14 +209,14 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
         flag_isIn_pixmap_Car = false;
         flag_isIn_pixmap_Map = false;
     }
-    if(event->buttons()&Qt::LeftButton) //鼠标左键按下的同时移动鼠标
+    if(event->buttons()&Qt::LeftButton) //click the left button of mouse while move the mouse
     {
         if(flag_translate_pixmap_Car)
         {
             endPoint = event->pos();
             point_origin_pixmap_Car.setX(point_origin_pixmap_Car.x()+(endPoint.x()-lastPoint.x()));
             point_origin_pixmap_Car.setY(point_origin_pixmap_Car.y()+(endPoint.y()-lastPoint.y()));
-            update(); //进行绘制
+            update(); //draw the screen
             lastPoint = endPoint;
         }
     }
@@ -223,7 +224,7 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 
 void MainWindow::mouseReleaseEvent(QMouseEvent *event)
 {
-    if(event->button() == Qt::LeftButton) //鼠标左键释放
+    if(event->button() == Qt::LeftButton) //release the left button of mouse
     {
         if(flag_translate_pixmap_Car)
         {
@@ -231,7 +232,7 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
             point_origin_pixmap_Car.setX(point_origin_pixmap_Car.x()+(endPoint.x()-lastPoint.x()));
             point_origin_pixmap_Car.setY(point_origin_pixmap_Car.y()+(endPoint.y()-lastPoint.y()));
             //cout<<"location: "<<lastPixLocalePoint.x()<<" "<<lastPixLocalePoint.y()<<endl;
-            update(); //进行绘制
+            update(); ////draw the screen
             lastPoint = endPoint;
         }
     }

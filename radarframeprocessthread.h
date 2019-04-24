@@ -1,18 +1,18 @@
 #ifndef RADARFRAMEPROCESSTHREAD_H
 #define RADARFRAMEPROCESSTHREAD_H
 
-#define RADAR_NUMS 4
-#define LAST_RADAR_OVERLAP_ZONE 150
+#define RADAR_NUMS 3
+#define LAST_RADAR_OVERLAP_ZONE 200
 #define THIS_RADAR_OVERLAP_ZONE 50
 #define THRESHOLD 50
 
 #include <QObject>
 #include <QThread>
 #include <radarunitdata.h>
-#include <receivelicenseplate.h>
 #include <licenseplateunit.h>
 #include <QVector>
 #include <QtMath>
+#include <iostream>
 
 class RadarFrameProcessThread : public QThread
 {

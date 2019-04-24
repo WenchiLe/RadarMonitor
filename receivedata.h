@@ -23,10 +23,10 @@ class ReceiveData : public QThread
 public:
     struct Frame60Bs
     {
-        int length;//the number of objects
         int radar_ID;//the index of radar
+        int length;//the number of objects
         int64_t time;//the time of frame;
-        float frame[256][5];//[0]:object_ID; [1]:dis_long; [2]:dis_lat; [3]:V_long; [4]:V_lat
+        float frame[256][6];//[0]:object_ID; [1]:dis_long; [2]:dis_lat; [3]:V_long; [4]:V_lat [5]:state;
     };
 
     WSADATA wsaData;

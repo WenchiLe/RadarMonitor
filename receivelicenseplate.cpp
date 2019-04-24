@@ -10,7 +10,7 @@ void ReceiveLicensePlate::StartReceiveData()
     // Initialize Winsock
     iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
     if (iResult != 0) {
-        printf("WSAStartup failed with error: %d\n", iResult);
+        printf("license: WSAStartup failed with error: %d\n", iResult);
         return;
     }
 
@@ -23,7 +23,7 @@ void ReceiveLicensePlate::StartReceiveData()
     // Resolve the server address and port
     iResult = getaddrinfo(NULL, DEFAULT_PORT, &hints, &result);
     if (iResult != 0) {
-        printf("getaddrinfo failed with error: %d\n", iResult);
+        printf("license: getaddrinfo failed with error: %d\n", iResult);
         WSACleanup();
         return;
     }
@@ -31,7 +31,7 @@ void ReceiveLicensePlate::StartReceiveData()
     // Create a SOCKET for connecting to server
     ListenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
     if (ListenSocket == INVALID_SOCKET) {
-        printf("socket failed with error: %ld\n", WSAGetLastError());
+        printf("license: socket failed with error: %ld\n", WSAGetLastError());
         freeaddrinfo(result);
         WSACleanup();
         return;
@@ -40,7 +40,7 @@ void ReceiveLicensePlate::StartReceiveData()
     // Setup the TCP listening socket
     iResult = bind(ListenSocket, result->ai_addr, (int)result->ai_addrlen);
     if (iResult == SOCKET_ERROR) {
-        printf("bind failed with error: %d\n", WSAGetLastError());
+        printf("license: bind failed with error: %d\n", WSAGetLastError());
         freeaddrinfo(result);
         closesocket(ListenSocket);
         WSACleanup();
@@ -51,7 +51,7 @@ void ReceiveLicensePlate::StartReceiveData()
 
     iResult = listen(ListenSocket, SOMAXCONN);
     if (iResult == SOCKET_ERROR) {
-        printf("listen failed with error: %d\n", WSAGetLastError());
+        printf("license: listen failed with error: %d\n", WSAGetLastError());
         closesocket(ListenSocket);
         WSACleanup();
         return;
@@ -68,7 +68,7 @@ void ReceiveLicensePlate::run()
         // Accept a client socket
         ClientSocket = accept(ListenSocket, NULL, NULL);
         if (ClientSocket == INVALID_SOCKET) {
-            printf("accept failed with error: %d\n", WSAGetLastError());
+            printf("license: accept failed with error: %d\n", WSAGetLastError());
             closesocket(ListenSocket);
             WSACleanup();
             return;
@@ -77,40 +77,35 @@ void ReceiveLicensePlate::run()
         //Receive until the peer shuts down the connection
         do
         {
-            carLicense frame60Bs;
-            iResult = recv(ClientSocket, (char*)&frame60Bs, sizeof(frame60Bs), 0);
+            carLicense carLicense;
+            iResult = recv(ClientSocket, (char*)&carLicense, sizeof(carLicense), 0);
             if (iResult > 0) {
-                //printf("Bytes received: %d\n", iResult);
+                //printf("license: Bytes received: %d\n", iResult);
                 if (iResult == sizeof(carLicense))
                 {
-                    //cout << "data.length:" << frame60Bs.length << endl;
-                    //for (int j = 0;j < frame60Bs.length;j++)
-                    //{
-                    //    cout << "ObjID:" << frame60Bs.frame[j][0] << endl;
-                    //    cout << "ObjDistLong:" << frame60Bs.frame[j][1] << endl;
-                    //    cout << "ObjDistLat:" << frame60Bs.frame[j][2] << endl;
-                    //    cout << "ObjVelocityLong:" << frame60Bs.frame[j][3] << endl;
-                    //    cout << "ObjvelocityLat:" << frame60Bs.frame[j][4] << endl;
-                    //}
+//                    std::cout<<"license:"<<carLicense.license<<
+//                               " long:"<<carLicense.longtitude<<
+//                               " lat:"<<carLicense.latitude<<
+//                               " timestamp:"<<carLicense.timeStamp<<std::endl;
                     mutex.lock();
-                    queueCarLicense.enqueue(frame60Bs);
+                    queueCarLicense.enqueue(carLicense);
                     mutex.unlock();
                 }
                 else {
-                    std::cout << "package lost" << std::endl;
+                    std::cout << "license: package lost" << std::endl;
                 }
             }
             else if (iResult == 0)
-                printf("no data...\n");
+                printf("license: no data...\n");
             else {
-                printf("recv failed with error: %d\n", WSAGetLastError());
+                printf("license: recv failed with error: %d\n", WSAGetLastError());
                 closesocket(ClientSocket);
             }
         } while (iResult > 0);
 
         iResult = shutdown(ClientSocket, SD_RECEIVE);
         if (iResult == SOCKET_ERROR) {
-            printf("shutdown failed with error: %d\n", WSAGetLastError());
+            printf("license: shutdown failed with error: %d\n", WSAGetLastError());
             closesocket(ClientSocket);
         }
         closesocket(ClientSocket);
@@ -122,14 +117,14 @@ void ReceiveLicensePlate::StopReceiveData()
     ListenFlag = 0;
     if(!this->wait(5000))
     {
-        qWarning("ReceiveData : Thread deadlock detected");
+        qWarning("license: ReceiveData : Thread deadlock detected");
         this->terminate();
         this->wait();
     }
 
     iResult = shutdown(ClientSocket, SD_RECEIVE);
     if (iResult == SOCKET_ERROR) {
-        printf("shutdown failed with error: %d\n", WSAGetLastError());
+        printf("license: shutdown failed with error: %d\n", WSAGetLastError());
         closesocket(ClientSocket);
     }
     closesocket(ClientSocket);

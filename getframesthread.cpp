@@ -19,7 +19,7 @@ void GetFramesThread::run()
             frame60Bs = receiveData.GetQueue();
             emit ToStoreFrames(frame60Bs);
             //std::cout<<frame60Bs.radar_ID<<std::endl;
-            if(frame60Bs.radar_ID == radar_ID)
+            if(frame60Bs.radar_ID-1 == radar_ID)
             {
                 emit FramesChanged(frame60Bs);
             }

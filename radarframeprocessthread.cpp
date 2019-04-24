@@ -6,6 +6,7 @@ RadarFrameProcessThread::RadarFrameProcessThread()
     {
         RadarUnitData radarUnitData;
         radarUnitData.SetRadarID(i);
+        radarUnitData.SetRadarLocation(QPoint(0,200*i));
         vector_RadarUnitData.push_back(radarUnitData);
     }
 }
@@ -13,14 +14,19 @@ RadarFrameProcessThread::RadarFrameProcessThread()
 void RadarFrameProcessThread::run()
 {
     //initial: each radar push 20 frames
-    for(int radarID = 0; radarID < RADAR_NUMS; radarID++)
+    //    for(int radarID = 0; radarID < RADAR_NUMS; radarID++)
+    //    {
+    //        if(vector_RadarUnitData[radarID].GetFrameCount()<20)
+    //        {
+    //            msleep(15);
+    //            radarID--;
+    //        }
+    //    }
+    while(vector_RadarUnitData[0].GetFrameCount()<20)
     {
-        if(vector_RadarUnitData[radarID].GetFrameCount()<20)
-        {
-            msleep(15);
-            radarID--;
-        }
+        msleep(15);
     }
+
     //pop 19 frames to get the 20th frame of radar#0
     for(int i = 0; i < 19; i++)
     {
@@ -31,7 +37,8 @@ void RadarFrameProcessThread::run()
     while(true)
     {
         //process LicensePlate and the 1st radar:radar #0
-        if(licensePlateUnit.HasFrame())
+        //if(licensePlateUnit.HasFrame())
+        if(false)
         {
             LicensePlateUnit::carLicense carLicense = licensePlateUnit.FetchFrame();
 
@@ -46,12 +53,12 @@ void RadarFrameProcessThread::run()
             //if carLicense.time is ealier than any frameRadar0.time, then drop this carLicense and get next carLicense
             while(frame0.time > carLicense.time)
             {
-                if(vector_RadarUnitData[0].GetFrameCount() == 0)
+                if(licensePlateUnit.HasFrame())
                 {
                     msleep(15);
                     continue;
                 }
-                frame0 = vector_RadarUnitData[0].FetchFrame();
+                carLicense = licensePlateUnit.FetchFrame();
             }
 
             RadarUnitData::Frame frame1 = vector_RadarUnitData[0].GetViewOfFrame(0);
@@ -70,7 +77,7 @@ void RadarFrameProcessThread::run()
 
             //compare carLicense, frame0, frame1
             double min_threshold_long = carLicense.longtitude/2;
-            double max_threshold_long = carLicense.longtitude*1.5;
+            double max_threshold_long =                            carLicense.longtitude*1.5;
             double min_threshold_lat = carLicense.latitude - 5;
             double max_threshold_lat = carLicense.latitude + 5;
             int64_t deltaTime_F0_Lic = frame0.time - carLicense.time;
@@ -106,6 +113,7 @@ void RadarFrameProcessThread::run()
             }
 
             //update the map_license
+            std::cout<<"license and radar #0 has matched: objID: "<<objID<<" license: "<<carLicense.license.toStdString()<<std::endl;
             vector_RadarUnitData[0].UpdateMapLicense(objID,carLicense.license);
         }
 
@@ -152,16 +160,17 @@ void RadarFrameProcessThread::run()
             int64_t deltaTime_B1_A = frameB1.time - frameA.time;
             float deltaLong = vector_RadarUnitData[radarID+1].point_radar_location.y()-vector_RadarUnitData[radarID].point_radar_location.y();
             float deltaLat = vector_RadarUnitData[radarID+1].point_radar_location.x()-vector_RadarUnitData[radarID].point_radar_location.x();
+            vector_RadarUnitData[radarID+1].CompareState.clear();
             foreach (RadarUnitData::CarInfo carA, frameA.cars)
             {
-                if(carA.longtitude < LAST_RADAR_OVERLAP_ZONE)
+                if(carA.longtitude < deltaLong)
                 {
                     continue;
                 }
                 float diff = THRESHOLD;
                 float minDiff = THRESHOLD;
                 int objID_B = -1;
-                foreach(RadarUnitData::CarInfo carB0, frameA.cars)
+                foreach(RadarUnitData::CarInfo carB0, frameB0.cars)
                 {
                     if(carB0.longtitude>THIS_RADAR_OVERLAP_ZONE)
                     {
@@ -174,7 +183,7 @@ void RadarFrameProcessThread::run()
                         objID_B = carB0.objID;
                     }
                 }
-                foreach(RadarUnitData::CarInfo carB1, frameA.cars)
+                foreach(RadarUnitData::CarInfo carB1, frameB1.cars)
                 {
                     if(carB1.longtitude>THIS_RADAR_OVERLAP_ZONE)
                     {
@@ -189,7 +198,6 @@ void RadarFrameProcessThread::run()
                 }
 
                 //push compare result into CompareState List; (if objID_B is repeated, choose whose diff is smaller)
-                vector_RadarUnitData[radarID+1].CompareState.clear();
                 RadarUnitData:: UnitCompare unitCompare;
                 unitCompare.objID_this_radar = objID_B;
                 unitCompare.objID_last_radar = carA.objID;
@@ -214,11 +222,13 @@ void RadarFrameProcessThread::run()
             }
 
             //update the map_license
+            std::cout<<"radar #"<<radarID+1<<" and radar #"<<radarID+2<<" has matched:"<<std::endl;
             foreach(RadarUnitData:: UnitCompare item,vector_RadarUnitData[radarID+1].CompareState)
             {
                 int objID_A = item.objID_last_radar;
                 int objID_B = item.objID_this_radar;
                 QString license = vector_RadarUnitData[radarID].GetLicense(objID_A);
+                std::cout<<"objID_A:"<<objID_A<<" objID_B:"<<objID_B<<" license: "<<license.toStdString()<<std::endl;
                 vector_RadarUnitData[radarID+1].UpdateMapLicense(objID_B,license);
             }
         }
@@ -227,14 +237,17 @@ void RadarFrameProcessThread::run()
 
 void RadarFrameProcessThread::StoreNewFrames(ReceiveData::Frame60Bs frame60Bs)
 {
-    vector_RadarUnitData[frame60Bs.radar_ID].PushNewFrame(frame60Bs);
+    if(frame60Bs.radar_ID>=1&&frame60Bs.radar_ID<=RADAR_NUMS)
+    {
+        vector_RadarUnitData[frame60Bs.radar_ID-1].PushNewFrame(frame60Bs);
+    }
 }
 
 float RadarFrameProcessThread::FrameCompare(RadarUnitData::CarInfo carA, RadarUnitData::CarInfo carB, int64_t deltaTime, float deltaLong, float deltaLat)
 {
     float diff;
-    float x = carA.latitude + carA.latVelocity * deltaTime - deltaLat;
-    float y = carA.longtitude + carA.longVelocity * deltaTime - deltaLong;
+    float x = carA.latitude + carA.latVelocity * deltaTime/1000 - deltaLat;
+    float y = carA.longtitude + carA.longVelocity * deltaTime/1000 - deltaLong;
     diff = qSqrt(qPow(carB.latitude-x,2)+qPow(carB.longtitude-y,2));
     if(diff<THRESHOLD)
     {

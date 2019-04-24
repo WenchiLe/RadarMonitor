@@ -17,6 +17,7 @@ void RadarUnitData::PushNewFrame(ReceiveData::Frame60Bs frame60Bs)
     RadarUnitData::Frame frame;
     frame.time = frame60Bs.time;
     frame.car_num = frame60Bs.length;
+    frame.used = false;
     for(int i = 0; i < frame60Bs.length; i++)
     {
         RadarUnitData::CarInfo carInfo;
@@ -31,6 +32,10 @@ void RadarUnitData::PushNewFrame(ReceiveData::Frame60Bs frame60Bs)
     if(queue_frame.count() == MAX_FRAMES_COUNT)
     {
         queue_frame.pop_front();
+        if(index>0)
+        {
+            index--;
+        }
     }
     queue_frame.push_back(frame);
     mutex.unlock();
@@ -45,6 +50,10 @@ RadarUnitData::Frame RadarUnitData::FetchFrame()
     if(!queue_frame.isEmpty()){
         frame = queue_frame[0];
         queue_frame.pop_front();
+        if(index>0)
+        {
+            index--;
+        }
     }
     mutex.unlock();
     return frame;
@@ -55,10 +64,10 @@ RadarUnitData::Frame RadarUnitData::GetViewOfFrame(int i)
     RadarUnitData::Frame frame;
     frame.car_num = 0;
     frame.time = 0;
+    frame.used = false;
     mutex.lock();
     if(queue_frame.count()>i){
         frame = queue_frame[i];
-        queue_frame.pop_front();
     }
     mutex.unlock();
     return frame;
@@ -92,4 +101,23 @@ QString RadarUnitData::GetLicense(int objID)
     license = map_license.value(objID,"");
     mutex.unlock();
     return license;
+}
+
+RadarUnitData::Frame RadarUnitData::GetNextProcessFrame()
+{
+    RadarUnitData::Frame frame;
+    frame.car_num = 0;
+    frame.time = 0;
+    frame.used = false;
+    mutex.lock();
+    if(queue_frame.count()>index){
+        frame = queue_frame[index];
+        queue_frame[index].used = true;
+        if(index<MAX_FRAMES_COUNT-1)
+        {
+            index++;
+        }
+    }
+    mutex.unlock();
+    return frame;
 }

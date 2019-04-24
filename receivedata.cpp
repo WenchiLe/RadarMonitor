@@ -10,7 +10,7 @@ void ReceiveData::StartReceiveData()
     // Initialize Winsock
     iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
     if (iResult != 0) {
-        printf("WSAStartup failed with error: %d\n", iResult);
+        printf("radar: WSAStartup failed with error: %d\n", iResult);
         return;
     }
 
@@ -23,7 +23,7 @@ void ReceiveData::StartReceiveData()
     // Resolve the server address and port
     iResult = getaddrinfo(NULL, DEFAULT_PORT, &hints, &result);
     if (iResult != 0) {
-        printf("getaddrinfo failed with error: %d\n", iResult);
+        printf("radar: getaddrinfo failed with error: %d\n", iResult);
         WSACleanup();
         return;
     }
@@ -31,7 +31,7 @@ void ReceiveData::StartReceiveData()
     // Create a SOCKET for connecting to server
     ListenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
     if (ListenSocket == INVALID_SOCKET) {
-        printf("socket failed with error: %ld\n", WSAGetLastError());
+        printf("radar: socket failed with error: %ld\n", WSAGetLastError());
         freeaddrinfo(result);
         WSACleanup();
         return;
@@ -40,7 +40,7 @@ void ReceiveData::StartReceiveData()
     // Setup the TCP listening socket
     iResult = bind(ListenSocket, result->ai_addr, (int)result->ai_addrlen);
     if (iResult == SOCKET_ERROR) {
-        printf("bind failed with error: %d\n", WSAGetLastError());
+        printf("radar: bind failed with error: %d\n", WSAGetLastError());
         freeaddrinfo(result);
         closesocket(ListenSocket);
         WSACleanup();
@@ -51,7 +51,7 @@ void ReceiveData::StartReceiveData()
 
     iResult = listen(ListenSocket, SOMAXCONN);
     if (iResult == SOCKET_ERROR) {
-        printf("listen failed with error: %d\n", WSAGetLastError());
+        printf("radar: listen failed with error: %d\n", WSAGetLastError());
         closesocket(ListenSocket);
         WSACleanup();
         return;
@@ -68,7 +68,7 @@ void ReceiveData::run()
         // Accept a client socket
         ClientSocket = accept(ListenSocket, NULL, NULL);
         if (ClientSocket == INVALID_SOCKET) {
-            printf("accept failed with error: %d\n", WSAGetLastError());
+            printf("radar: accept failed with error: %d\n", WSAGetLastError());
             closesocket(ListenSocket);
             WSACleanup();
             return;
@@ -80,10 +80,10 @@ void ReceiveData::run()
             Frame60Bs frame60Bs;
             iResult = recv(ClientSocket, (char*)&frame60Bs, sizeof(frame60Bs), 0);
             if (iResult > 0) {
-                //printf("Bytes received: %d\n", iResult);
+                //printf("radar: Bytes received: %d\n", iResult);
                 if (iResult == sizeof(Frame60Bs))
                 {
-                    //cout << "data.length:" << frame60Bs.length << endl;
+                    //std::cout << "data.length:" << frame60Bs.length << std::endl;
                     //for (int j = 0;j < frame60Bs.length;j++)
                     //{
                     //    cout << "ObjID:" << frame60Bs.frame[j][0] << endl;
@@ -97,20 +97,20 @@ void ReceiveData::run()
                     mutex.unlock();
                 }
                 else {
-                    std::cout << "package lost" << std::endl;
+                    std::cout << "radar: package lost" << std::endl;
                 }
             }
             else if (iResult == 0)
-                printf("no data...\n");
+                printf("radar: no data...\n");
             else {
-                printf("recv failed with error: %d\n", WSAGetLastError());
+                printf("radar: recv failed with error: %d\n", WSAGetLastError());
                 closesocket(ClientSocket);
             }
         } while (iResult > 0);
 
         iResult = shutdown(ClientSocket, SD_RECEIVE);
         if (iResult == SOCKET_ERROR) {
-            printf("shutdown failed with error: %d\n", WSAGetLastError());
+            printf("radar: shutdown failed with error: %d\n", WSAGetLastError());
             closesocket(ClientSocket);
         }
         closesocket(ClientSocket);
@@ -122,14 +122,14 @@ void ReceiveData::StopReceiveData()
     ListenFlag = 0;
     if(!this->wait(5000))
     {
-        qWarning("ReceiveData : Thread deadlock detected");
+        qWarning("radar: ReceiveData : Thread deadlock detected");
         this->terminate();
         this->wait();
     }
 
     iResult = shutdown(ClientSocket, SD_RECEIVE);
     if (iResult == SOCKET_ERROR) {
-        printf("shutdown failed with error: %d\n", WSAGetLastError());
+        printf("radar: shutdown failed with error: %d\n", WSAGetLastError());
         closesocket(ClientSocket);
     }
     closesocket(ClientSocket);
