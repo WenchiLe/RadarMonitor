@@ -3,7 +3,7 @@
 
 #define LAST_RADAR_OVERLAP_ZONE 200
 #define THIS_RADAR_OVERLAP_ZONE 50
-#define THRESHOLD 50
+#define THRESHOLD 20
 
 #include <QObject>
 #include <QThread>
@@ -26,8 +26,8 @@ protected:
 
 private:
     //compare RadarUnitData A and B, and transmit the license in A to B
-    RadarUnitData radarUnitA;
-    RadarUnitData radarUnitB;
+    RadarUnitData *radarUnitA;
+    RadarUnitData *radarUnitB;
 };
 
 #endif // RADARRADARCOMPARETHREAD_H

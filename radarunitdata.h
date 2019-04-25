@@ -49,6 +49,8 @@ public:
 
 private:
     int index = 0;
+    int indexCompare0 = 0;
+    int indexCompare1 = 1;
 
 public:
     RadarUnitData();
@@ -61,6 +63,10 @@ public:
     void UpdateMapLicense(int objID,QString license);
     QString GetLicense(int objID);
     Frame GetNextProcessFrame();
+    Frame GetCompareFrame0();
+    Frame GetCompareFrame1();
+    void UpCompareIndex();
+    bool CanCompare();
 };
 
 #endif // RADARUNITDATA_H

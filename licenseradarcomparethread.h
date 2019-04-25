@@ -1,11 +1,30 @@
 #ifndef LICENSERADARCOMPARETHREAD_H
 #define LICENSERADARCOMPARETHREAD_H
 
+#define THRESHOLD 10
 
-class LicenseRadarCompareThread
+#include <QObject>
+#include <QThread>
+#include <radarunitdata.h>
+#include <licenseplateunit.h>
+#include <QtMath>
+#include <iostream>
+
+class LicenseRadarCompareThread : public QThread
 {
+    Q_OBJECT
+
 public:
-    LicenseRadarCompareThread();
+    LicenseRadarCompareThread(LicensePlateUnit *licensePlateUnit,RadarUnitData *radarUnit);
+    float LicenseFrameCompare(RadarUnitData::CarInfo car,LicensePlateUnit::carLicense carLicense,int64_t deltaTime);
+
+protected:
+    void run();
+
+private:
+    //compare Radar and LicensePlate, and transmit the license to radar
+    RadarUnitData *radar;
+    LicensePlateUnit *licensePlate;
 };
 
 #endif // LICENSERADARCOMPARETHREAD_H

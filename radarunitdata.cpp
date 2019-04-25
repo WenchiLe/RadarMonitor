@@ -36,6 +36,14 @@ void RadarUnitData::PushNewFrame(ReceiveData::Frame60Bs frame60Bs)
         {
             index--;
         }
+        if(indexCompare0>0)
+        {
+            indexCompare0--;
+        }
+        if(indexCompare1>1)
+        {
+            indexCompare1--;
+        }
     }
     queue_frame.push_back(frame);
     mutex.unlock();
@@ -54,6 +62,14 @@ RadarUnitData::Frame RadarUnitData::FetchFrame()
         {
             index--;
         }
+        if(indexCompare0>0)
+        {
+            indexCompare0--;
+        }
+        if(indexCompare1>1)
+        {
+            indexCompare1--;
+        }
     }
     mutex.unlock();
     return frame;
@@ -64,7 +80,7 @@ RadarUnitData::Frame RadarUnitData::GetViewOfFrame(int i)
     RadarUnitData::Frame frame;
     frame.car_num = 0;
     frame.time = 0;
-    frame.used = false;
+    frame.used = true;
     mutex.lock();
     if(queue_frame.count()>i){
         frame = queue_frame[i];
@@ -108,16 +124,67 @@ RadarUnitData::Frame RadarUnitData::GetNextProcessFrame()
     RadarUnitData::Frame frame;
     frame.car_num = 0;
     frame.time = 0;
-    frame.used = false;
+    frame.used = true;
     mutex.lock();
     if(queue_frame.count()>index){
         frame = queue_frame[index];
         queue_frame[index].used = true;
-        if(index<MAX_FRAMES_COUNT-1)
+        if(index<queue_frame.count()-1)
         {
             index++;
         }
     }
     mutex.unlock();
     return frame;
+}
+
+RadarUnitData::Frame RadarUnitData::GetCompareFrame0()
+{
+    RadarUnitData::Frame frame;
+    frame.car_num = 0;
+    frame.time = 0;
+    frame.used = false;
+    mutex.lock();
+    if(queue_frame.count()>indexCompare0){
+        frame = queue_frame[indexCompare0];
+    }
+    mutex.unlock();
+    return frame;
+}
+
+RadarUnitData::Frame RadarUnitData::GetCompareFrame1()
+{
+    RadarUnitData::Frame frame;
+    frame.car_num = 0;
+    frame.time = 0;
+    frame.used = false;
+    mutex.lock();
+    if(queue_frame.count()>indexCompare1){
+        frame = queue_frame[indexCompare1];
+    }
+    mutex.unlock();
+    return frame;
+}
+
+void RadarUnitData::UpCompareIndex()
+{
+    mutex.lock();
+    if(queue_frame.count()-1>indexCompare1)
+    {
+        indexCompare1++;
+        indexCompare0++;
+    }
+    mutex.unlock();
+}
+
+bool RadarUnitData::CanCompare()
+{
+    bool flag = false;
+    mutex.lock();
+    if(queue_frame.count()-indexCompare0>=2)
+    {
+        flag=true;
+    }
+    mutex.unlock();
+    return flag;
 }

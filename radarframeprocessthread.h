@@ -13,6 +13,8 @@
 #include <QVector>
 #include <QtMath>
 #include <iostream>
+#include <radarradarcomparethread.h>
+#include <licenseradarcomparethread.h>
 
 class RadarFrameProcessThread : public QThread
 {
@@ -32,6 +34,7 @@ protected:
 private:
     QVector<RadarUnitData> vector_RadarUnitData;
     LicensePlateUnit licensePlateUnit;
+    QVector<RadarRadarCompareThread*> vector_RadarRadarCompareThread;
 
 private slots:
     void StoreNewFrames(ReceiveData::Frame60Bs frame60Bs);

@@ -107,7 +107,7 @@ void MainWindow::paintEvent(QPaintEvent *)
 //            cout<<"pointX: "<<cursorPointInPix.x()<<" pointY: "<<cursorPointInPix.y()<<endl;
             int objID = lastFrame60Bs.frame[j][0];
             license = radarFrameProcessThread.GetLicense(radarID,objID);
-            license = "hello"+QString::number(objID);
+            //license = "hello"+QString::number(objID);
             brush.setColor(QColor(255, 0, 0,255));
             carPainter.setBrush(brush);
         }
@@ -115,8 +115,8 @@ void MainWindow::paintEvent(QPaintEvent *)
         //                pen.setColor(QColor(0, 0, 0,255));
         //                carPainter.setPen(pen); //
         carPainter.drawEllipse(QPointF(x, y), 6, 6); //
-        carPainter.drawText(x+13,y+6, QString::number(velocity,'f',0)+"km/h");
-        //carPainter.drawText(x+7,y-7, "ID:"+QString::number(lastFrame60Bs.frame[j][0],'f',0));
+        //carPainter.drawText(x+13,y+6, QString::number(velocity,'f',0)+"km/h");
+        carPainter.drawText(x+7,y-7, "ID:"+QString::number(lastFrame60Bs.frame[j][0],'f',0));
         brush.setColor(QColor(0, 255, 0,255));
         carPainter.setBrush(brush);
     }

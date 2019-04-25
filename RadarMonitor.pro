@@ -34,7 +34,8 @@ SOURCES += \
     receivelicenseplate.cpp \
     getlicenseplatethread.cpp \
     licenseplateunit.cpp \
-    radarradarcomparethread.cpp
+    radarradarcomparethread.cpp \
+    licenseradarcomparethread.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -45,7 +46,8 @@ HEADERS += \
     receivelicenseplate.h \
     getlicenseplatethread.h \
     licenseplateunit.h \
-    radarradarcomparethread.h
+    radarradarcomparethread.h \
+    licenseradarcomparethread.h
 
 FORMS += \
         mainwindow.ui
