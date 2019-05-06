@@ -14,6 +14,7 @@ public:
         double longtitude;
         double latitude;
         int64_t time;
+        double speed;
         QString license;
     };
     QQueue<carLicense> queue_carLicense;

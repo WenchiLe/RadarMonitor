@@ -7,7 +7,7 @@
 #define THRESHOLD 50
 
 #include <QObject>
-#include <QThread>
+//#include <QThread>
 #include <radarunitdata.h>
 #include <licenseplateunit.h>
 #include <QVector>
@@ -16,25 +16,21 @@
 #include <radarradarcomparethread.h>
 #include <licenseradarcomparethread.h>
 
-class RadarFrameProcessThread : public QThread
+class RadarFrameProcessThread: public QObject
 {
     Q_OBJECT
 
 public:
     RadarFrameProcessThread();
     QString GetLicense(int radarID, int objID);
-
-private:
-    float FrameCompare(RadarUnitData::CarInfo carA, RadarUnitData::CarInfo carB, int64_t deltaTime, float deltaLong, float deltaLat);
-    float LicenseFrameCompare(RadarUnitData::CarInfo car,LicensePlateUnit::carLicense carLicense,int64_t deltaTime);
-
-protected:
-    void run();
+    void Start();
+    void Stop();
 
 private:
     QVector<RadarUnitData> vector_RadarUnitData;
     LicensePlateUnit licensePlateUnit;
     QVector<RadarRadarCompareThread*> vector_RadarRadarCompareThread;
+    LicenseRadarCompareThread *licenseRadarCompareThread;
 
 private slots:
     void StoreNewFrames(ReceiveData::Frame60Bs frame60Bs);

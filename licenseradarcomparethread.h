@@ -2,6 +2,7 @@
 #define LICENSERADARCOMPARETHREAD_H
 
 #define THRESHOLD 10
+#define FACTOR 0
 
 #include <QObject>
 #include <QThread>
@@ -17,6 +18,7 @@ class LicenseRadarCompareThread : public QThread
 public:
     LicenseRadarCompareThread(LicensePlateUnit *licensePlateUnit,RadarUnitData *radarUnit);
     float LicenseFrameCompare(RadarUnitData::CarInfo car,LicensePlateUnit::carLicense carLicense,int64_t deltaTime);
+    void Stop();
 
 protected:
     void run();
@@ -25,6 +27,7 @@ private:
     //compare Radar and LicensePlate, and transmit the license to radar
     RadarUnitData *radar;
     LicensePlateUnit *licensePlate;
+    bool flag;
 };
 
 #endif // LICENSERADARCOMPARETHREAD_H

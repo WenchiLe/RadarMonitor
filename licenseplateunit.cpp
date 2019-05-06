@@ -15,6 +15,7 @@ void LicensePlateUnit::PushNewFrame(ReceiveLicensePlate::carLicense carLicense)
     mycar.license = s;
     mycar.latitude = carLicense.latitude;
     mycar.longtitude = carLicense.longtitude;
+    mycar.speed = 0;
     mutex.lock();
     queue_carLicense.enqueue(mycar);
     mutex.unlock();

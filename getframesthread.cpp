@@ -5,13 +5,14 @@ GetFramesThread::GetFramesThread()
     qRegisterMetaType<ReceiveData::Frame60Bs>("ReceiveData::Frame60Bs");
     radar_ID = 0;
     receiveData.StartReceiveData();
+    flag = true;
 }
 
 
 
 void GetFramesThread::run()
 {
-    while(true)
+    while(flag)
     {
         if (receiveData.HasData())
         {
@@ -26,6 +27,18 @@ void GetFramesThread::run()
         }
         //msleep(1000);
     }
+}
+
+void GetFramesThread::Stop()
+{
+    flag = false;
+    if(!this->wait(5000))
+    {
+        qWarning("GetFramesThread : Thread deadlock detected");
+        this->terminate();
+        this->wait();
+    }
+    receiveData.StopReceiveData();
 }
 
 void GetFramesThread::SetRadarID(int radar_ID)

@@ -14,6 +14,7 @@ class GetFramesThread : public QThread
 public:
     GetFramesThread();
     void SetRadarID(int radar_ID);
+    void Stop();
 
 signals:
 void FramesChanged(ReceiveData::Frame60Bs frame60Bs);//signal to draw the last frame
@@ -25,7 +26,7 @@ protected:
 private:
     ReceiveData receiveData;
     int radar_ID;
-
+    bool flag;
 };
 
 #endif // GETFRAMESTHREAD_H

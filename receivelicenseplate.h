@@ -23,6 +23,7 @@ class ReceiveLicensePlate : public QThread
 public:
     struct carLicense
     {
+        //double speed = 0;
         double longtitude = 0.0;
         double latitude = 0.0;
         int64_t timeStamp = 0;

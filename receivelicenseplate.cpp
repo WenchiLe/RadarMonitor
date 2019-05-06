@@ -83,10 +83,10 @@ void ReceiveLicensePlate::run()
                 //printf("license: Bytes received: %d\n", iResult);
                 if (iResult == sizeof(carLicense))
                 {
-//                    std::cout<<"license:"<<carLicense.license<<
-//                               " long:"<<carLicense.longtitude<<
-//                               " lat:"<<carLicense.latitude<<
-//                               " timestamp:"<<carLicense.timeStamp<<std::endl;
+                    //                    std::cout<<"license:"<<carLicense.license<<
+                    //                               " long:"<<carLicense.longtitude<<
+                    //                               " lat:"<<carLicense.latitude<<
+                    //                               " timestamp:"<<carLicense.timeStamp<<std::endl;
                     mutex.lock();
                     queueCarLicense.enqueue(carLicense);
                     mutex.unlock();
@@ -101,7 +101,7 @@ void ReceiveLicensePlate::run()
                 printf("license: recv failed with error: %d\n", WSAGetLastError());
                 closesocket(ClientSocket);
             }
-        } while (iResult > 0);
+        } while (iResult > 0&&ListenFlag == 1);
 
         iResult = shutdown(ClientSocket, SD_RECEIVE);
         if (iResult == SOCKET_ERROR) {
@@ -115,23 +115,17 @@ void ReceiveLicensePlate::run()
 void ReceiveLicensePlate::StopReceiveData()
 {
     ListenFlag = 0;
+
+    // cleanup
+    closesocket(ListenSocket);
+    WSACleanup();
+
     if(!this->wait(5000))
     {
-        qWarning("license: ReceiveData : Thread deadlock detected");
+        qWarning("license:ReceiveLicensePlate : Thread deadlock detected");
         this->terminate();
         this->wait();
     }
-
-    iResult = shutdown(ClientSocket, SD_RECEIVE);
-    if (iResult == SOCKET_ERROR) {
-        printf("license: shutdown failed with error: %d\n", WSAGetLastError());
-        closesocket(ClientSocket);
-    }
-    closesocket(ClientSocket);
-    // cleanup
-    closesocket(ListenSocket);
-
-    WSACleanup();
 }
 
 

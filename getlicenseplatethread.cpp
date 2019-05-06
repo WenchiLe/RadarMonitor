@@ -4,11 +4,12 @@ GetLicensePlateThread::GetLicensePlateThread()
 {
     qRegisterMetaType<ReceiveLicensePlate::carLicense>("ReceiveLicensePlate::carLicense");
     receiveLicensePlate.StartReceiveData();
+    flag = true;
 }
 
 void GetLicensePlateThread::run()
 {
-    while(true)
+    while(flag)
     {
         if (receiveLicensePlate.HasData())
         {
@@ -17,5 +18,17 @@ void GetLicensePlateThread::run()
             emit LicensePlateChanged(frame60Bs);
         }
         //msleep(1000);
+    }
+}
+
+void GetLicensePlateThread::Stop()
+{
+    receiveLicensePlate.StopReceiveData();
+    flag = false;
+    if(!this->wait(5000))
+    {
+        qWarning("GetFramesThread : Thread deadlock detected");
+        this->terminate();
+        this->wait();
     }
 }

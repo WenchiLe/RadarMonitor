@@ -7,8 +7,10 @@
 #include <radarframeprocessthread.h>
 #include <getlicenseplatethread.h>
 #include <QtMath>
+#include <QMap>
 #include <QMouseEvent>
 #include <QWheelEvent>
+#include <QCloseEvent>
 
 namespace Ui {
 class MainWindow;
@@ -43,6 +45,7 @@ private:
     QPoint point_origin_pixmap_Map;
 
     QPoint cursorPointInPixMap;
+    QPoint cursorPointInPixCar;
 
     bool flag_isIn_pixmap_Car;
     bool flag_translate_pixmap_Car;
@@ -55,7 +58,9 @@ private:
     qreal scale_pixmap_Map;
 
     int radarID;
-    QString license;
+    int roadID;
+
+    QMap<int,bool> map_can_showDetail;
 
 protected:
     void paintEvent(QPaintEvent *);
@@ -63,6 +68,7 @@ protected:
     void mouseMoveEvent(QMouseEvent *);
     void mouseReleaseEvent(QMouseEvent *);
     void wheelEvent(QWheelEvent *);
+    void closeEvent(QCloseEvent *event);
 
 private slots:
     void NewFramesCome(ReceiveData::Frame60Bs frame60Bs);

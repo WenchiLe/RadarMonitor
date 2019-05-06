@@ -4,32 +4,33 @@ RadarRadarCompareThread::RadarRadarCompareThread(RadarUnitData *A,RadarUnitData 
 {
     radarUnitA = A;
     radarUnitB = B;
+    flag = true;
 }
 
 void RadarRadarCompareThread::run()
 {
     //initial: to insure A has data
-    std::cout<<"radar #"<<radarUnitA->radar_ID+1<<" and radar #"<<radarUnitB->radar_ID+1<<" compare thread start"<<std::endl;
-    while(radarUnitA->GetFrameCount()==0)
+    //std::cout<<"radar #"<<radarUnitA->radar_ID+1<<" and radar #"<<radarUnitB->radar_ID+1<<" compare thread start"<<std::endl;
+    while(radarUnitA->GetFrameCount()==0&&flag)
     {
         msleep(15);
         //std::cout<<"radar #"<<(*radarUnitA).radar_ID+1<<"has no data"<<std::endl;
     }
 
-    std::cout<<"radar #"<<radarUnitA->radar_ID+1<<"has data"<<std::endl;
+    //std::cout<<"radar #"<<radarUnitA->radar_ID+1<<"has data"<<std::endl;
 
-    while(true)
+    while(flag)
     {
         //get a new unused frameA from A
         RadarUnitData::Frame frameA = radarUnitA->GetNextProcessFrame();
-        while(frameA.used)
+        while(frameA.used&&flag)
         {
            msleep(15);
            frameA = radarUnitA->GetNextProcessFrame();
         }
 
         //to insure that there are 2 frames at least from last compared position in B
-        while(!radarUnitB->CanCompare())
+        while(!radarUnitB->CanCompare()&&flag)
         {
             msleep(15);
         }
@@ -38,7 +39,7 @@ void RadarRadarCompareThread::run()
         RadarUnitData::Frame frameB0 = radarUnitB->GetCompareFrame0();
 
         //if frameA.time is ealier than any frameB.time, then drop this frameA and get next unused frameA
-        while(frameB0.time > frameA.time && (!frameA.used))
+        while(frameB0.time > frameA.time && (!frameA.used)&&flag)
         {
             msleep(15);
             frameA = radarUnitA->GetNextProcessFrame();
@@ -48,7 +49,7 @@ void RadarRadarCompareThread::run()
         RadarUnitData::Frame frameB1 = radarUnitB->GetCompareFrame1();
 
         //if frameA.time is later than any frameB.time, then wait until one frameB is later than frameA
-        while(frameB1.time <= frameA.time)
+        while(frameB1.time <= frameA.time&&flag)
         {
             if(frameB0.used)
             {
@@ -130,13 +131,13 @@ void RadarRadarCompareThread::run()
         }
 
         //update the map_license
-        std::cout<<"radar #"<<radarUnitA->radar_ID+1<<" and radar #"<<radarUnitB->radar_ID+1<<" has matched:"<<std::endl;
+        //std::cout<<"radar #"<<radarUnitA->radar_ID+1<<" and radar #"<<radarUnitB->radar_ID+1<<" has matched:"<<std::endl;
         foreach(RadarUnitData:: UnitCompare item,radarUnitB->CompareState)
         {
             int objID_A = item.objID_last_radar;
             int objID_B = item.objID_this_radar;
             QString license = radarUnitA->GetLicense(objID_A);
-            std::cout<<"objID_A:"<<objID_A<<" objID_B:"<<objID_B<<" license: "<<license.toStdString()<<std::endl;
+            //std::cout<<"objID_A:"<<objID_A<<" objID_B:"<<objID_B<<" license: "<<license.toStdString()<<std::endl;
             radarUnitB->UpdateMapLicense(objID_B,license);
         }
     }
@@ -144,14 +145,27 @@ void RadarRadarCompareThread::run()
 
 float RadarRadarCompareThread::FrameCompare(RadarUnitData::CarInfo carA, RadarUnitData::CarInfo carB, int64_t deltaTime, float deltaLong, float deltaLat)
 {
-    float diff;
+    float diff, diff_dis, diff_speed;
     float x = carA.latitude + carA.latVelocity * deltaTime/1000 - deltaLat;
     float y = carA.longtitude + carA.longVelocity * deltaTime/1000 - deltaLong;
-    diff = qSqrt(qPow(carB.latitude-x,2)+qPow(carB.longtitude-y,2));
+    diff_dis = qSqrt(qPow(carB.latitude-x,2)+qPow(carB.longtitude-y,2));
+    diff_speed = qSqrt(qPow(carA.latVelocity,2)+qPow(carA.longVelocity,2))-qSqrt(qPow(carB.latVelocity,2)+qPow(carB.longVelocity,2));
+    diff = diff_dis+qAbs(diff_speed)*FACTOR;
     if(diff<THRESHOLD)
     {
         return diff;
     }else{
         return THRESHOLD;
+    }
+}
+
+void RadarRadarCompareThread::Stop()
+{
+    flag = false;
+    if(!this->wait(5000))
+    {
+        qWarning("RadarRadarCompareThread : Thread deadlock detected");
+        this->terminate();
+        this->wait();
     }
 }

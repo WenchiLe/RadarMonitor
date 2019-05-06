@@ -120,23 +120,18 @@ void ReceiveData::run()
 void ReceiveData::StopReceiveData()
 {
     ListenFlag = 0;
-    if(!this->wait(5000))
-    {
-        qWarning("radar: ReceiveData : Thread deadlock detected");
-        this->terminate();
-        this->wait();
-    }
 
-    iResult = shutdown(ClientSocket, SD_RECEIVE);
-    if (iResult == SOCKET_ERROR) {
-        printf("radar: shutdown failed with error: %d\n", WSAGetLastError());
-        closesocket(ClientSocket);
-    }
-    closesocket(ClientSocket);
     // cleanup
     closesocket(ListenSocket);
 
     WSACleanup();
+
+    if(!this->wait(5000))
+    {
+        qWarning("radar:ReceiveData : Thread deadlock detected");
+        this->terminate();
+        this->wait();
+    }
 }
 
 

@@ -13,6 +13,7 @@ class GetLicensePlateThread : public QThread
 
 public:
     GetLicensePlateThread();
+    void Stop();
 
 signals:
 void LicensePlateChanged(ReceiveLicensePlate::carLicense carLicense);//signal to draw the last frame
@@ -22,6 +23,7 @@ protected:
 
 private:
     ReceiveLicensePlate receiveLicensePlate;
+    bool flag;
 };
 
 #endif // GETLICENSEPLATETHREAD_H
