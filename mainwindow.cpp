@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     lastFrame60Bs.length = 0;
     getLicensePlateThread.start();
     getFramesThread.start();
-    radarFrameProcessThread.Start();
+    //radarFrameProcessThread.Start();
 
     point_location_pixmap_Car = QPoint(0,13);
     point_location_pixmap_Map = QPoint(713,476);

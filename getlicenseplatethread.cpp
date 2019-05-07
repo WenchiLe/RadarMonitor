@@ -3,7 +3,7 @@
 GetLicensePlateThread::GetLicensePlateThread()
 {
     qRegisterMetaType<ReceiveLicensePlate::carLicense>("ReceiveLicensePlate::carLicense");
-    receiveLicensePlate.StartReceiveData();
+    //receiveLicensePlate.StartReceiveData();
     flag = true;
 }
 

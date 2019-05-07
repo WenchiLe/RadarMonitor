@@ -4,7 +4,8 @@ GetFramesThread::GetFramesThread()
 {
     qRegisterMetaType<ReceiveData::Frame60Bs>("ReceiveData::Frame60Bs");
     radar_ID = 0;
-    receiveData.StartReceiveData();
+    //receiveData.StartReceiveData();
+    receiveDataFromServer.StartReceiveData();
     flag = true;
 }
 

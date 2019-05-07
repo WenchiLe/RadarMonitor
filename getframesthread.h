@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QThread>
 #include <receivedata.h>
+#include <receivedatafromserver.h>
 #include <QVector>
 #include <QList>
 
@@ -27,6 +28,7 @@ private:
     ReceiveData receiveData;
     int radar_ID;
     bool flag;
+    ReceiveDataFromServer receiveDataFromServer;
 };
 
 #endif // GETFRAMESTHREAD_H
