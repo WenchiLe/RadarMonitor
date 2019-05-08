@@ -12,6 +12,8 @@
 #include <QWheelEvent>
 #include <QCloseEvent>
 
+#define ROADNUM 2
+
 namespace Ui {
 class MainWindow;
 }
@@ -59,6 +61,8 @@ private:
 
     int radarID;
     int roadID;
+    int roadOffSet[ROADNUM] = {0};
+    int roadZoom[ROADNUM] = {0};
 
     QMap<int,bool> map_can_showDetail;
 
@@ -72,6 +76,10 @@ protected:
 
 private slots:
     void NewFramesCome(ReceiveData::Frame60Bs frame60Bs);
+    void on_pushButton_road_left_clicked();
+    void on_pushButton_road_right_clicked();
+    void on_pushButton_road_enlarge_clicked();
+    void on_pushButton_road_shrink_clicked();
 };
 
 #endif // MAINWINDOW_H

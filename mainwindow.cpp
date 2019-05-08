@@ -113,11 +113,11 @@ void MainWindow::paintEvent(QPaintEvent *)
     switch (roadID) {
     case 0:
         pix_Road.load("images/road.png");
-        carPainter.drawPixmap(245,-100,209,1100,pix_Road);
+        carPainter.drawPixmap(245+roadOffSet[roadID],-100,209+roadZoom[roadID],1100,pix_Road);
         break;
     case 1:
-        pix_Road.load("images/road4.png");
-        carPainter.drawPixmap(265,-100,131,1100,pix_Road);
+        pix_Road.load("images/road5.png");
+        carPainter.drawPixmap(265+roadOffSet[roadID],-100,150+roadZoom[roadID],1100,pix_Road);
         break;
     }
 
@@ -149,10 +149,6 @@ void MainWindow::paintEvent(QPaintEvent *)
     carPainter.setPen(pen);
     QBrush brush(Qt::white);
     carPainter.setBrush(brush);
-
-    //    QPoint cursorPointInPix;
-    //    cursorPointInPix.setX((cursorPoint.x()-point_origin_pixmap_Car.x()-point_location_pixmap_Car.x())/scale_pixmap_Car);
-    //    cursorPointInPix.setY((cursorPoint.y()-point_origin_pixmap_Car.y()-point_location_pixmap_Car.y())/scale_pixmap_Car);
     for(int j=0;j<lastFrame60Bs.length;j++)
     {
         int x = (int)(350 - (lastFrame60Bs.frame[j][2]*6));
@@ -223,16 +219,16 @@ void MainWindow::paintEvent(QPaintEvent *)
         {
             QPen penPlate(Qt::gray,5);
             carPainter.setPen(penPlate);
-            carPainter.drawLine(QPointF(230, 750), QPointF(470, 750));
+            carPainter.drawLine(QPointF(230+roadOffSet[roadID], 750), QPointF(470+roadOffSet[roadID]+roadZoom[roadID], 750));
             penPlate.setColor(Qt::black);
             carPainter.setPen(penPlate);
             carPainter.setFont(QFont("times",24));
-            carPainter.drawText(475,760, "卡口");
+            carPainter.drawText(475+roadOffSet[roadID]+roadZoom[roadID],760, "卡口");
             for(int j = 1; j<=5;j++)
             {
                 QPixmap pix_plate;
                 pix_plate.load("images/plate_white.png");
-                carPainter.drawPixmap(282+(j-1)*30,740,20,20,pix_plate);
+                carPainter.drawPixmap(282+(j-1)*(30+roadZoom[roadID]/7)+roadOffSet[roadID],740,20+roadZoom[roadID],20,pix_plate);
             }
         }
         break;
@@ -359,4 +355,28 @@ void MainWindow::closeEvent(QCloseEvent *event)
     getLicensePlateThread.Stop();
     getFramesThread.Stop();
     radarFrameProcessThread.Stop();
+}
+
+void MainWindow::on_pushButton_road_left_clicked()
+{
+    roadOffSet[roadID]--;
+    update();
+}
+
+void MainWindow::on_pushButton_road_right_clicked()
+{
+    roadOffSet[roadID]++;
+    update();
+}
+
+void MainWindow::on_pushButton_road_enlarge_clicked()
+{
+    roadZoom[roadID]++;
+    update();
+}
+
+void MainWindow::on_pushButton_road_shrink_clicked()
+{
+    roadZoom[roadID]--;
+    update();
 }
