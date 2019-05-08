@@ -66,6 +66,8 @@ private:
 
     QMap<int,bool> map_can_showDetail;
 
+    qreal carAngle = 0;
+
 protected:
     void paintEvent(QPaintEvent *);
     void mousePressEvent(QMouseEvent *);

@@ -116,7 +116,7 @@ void MainWindow::paintEvent(QPaintEvent *)
         carPainter.drawPixmap(245+roadOffSet[roadID],-100,209+roadZoom[roadID],1100,pix_Road);
         break;
     case 1:
-        pix_Road.load("images/road5.png");
+        pix_Road.load("images/road4.png");
         carPainter.drawPixmap(265+roadOffSet[roadID],-100,150+roadZoom[roadID],1100,pix_Road);
         break;
     }
@@ -181,15 +181,14 @@ void MainWindow::paintEvent(QPaintEvent *)
         }
         //                pen.setColor(QColor(0, 0, 0,255));
         //                carPainter.setPen(pen); //
-        QPixmap pix;
-        pix.load("images/car.png");
-        carPainter.drawPixmap(x-6,y-12,12,24,pix);
-
-        //carPainter.drawEllipse(QPointF(x, y), 6, 6); //
-        //carPainter.drawText(x+13,y+6, QString::number(velocity,'f',0)+"km/h");
-        //carPainter.drawText(x+7,y-7, "ID:"+QString::number(lastFrame60Bs.frame[j][0],'f',0));
-        //        brush.setColor(QColor(0, 255, 0,255));
-        //        carPainter.setBrush(brush);
+        QPixmap pix("images/car.png");
+        QMatrix matrix;
+        float vy = lastFrame60Bs.frame[j][3];
+        float vx = -lastFrame60Bs.frame[j][4];
+        carAngle = qAtan(vy/vx);
+        matrix.rotate(qRadiansToDegrees(carAngle));
+        pix = pix.transformed(matrix,Qt::SmoothTransformation);
+        carPainter.drawPixmap(x-6,y-13,pix);
     }
 
     //draw detail
