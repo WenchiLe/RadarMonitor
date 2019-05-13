@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1350</width>
+    <width>1850</width>
     <height>913</height>
    </rect>
   </property>
@@ -81,13 +81,168 @@
      <string>-</string>
     </property>
    </widget>
+   <widget class="RangeSlider" name="rangeSlider_long_dis" native="true">
+    <property name="geometry">
+     <rect>
+      <x>1400</x>
+      <y>60</y>
+      <width>400</width>
+      <height>50</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_long_dis">
+    <property name="geometry">
+     <rect>
+      <x>1400</x>
+      <y>10</y>
+      <width>400</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>longitude distance</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="RangeSlider" name="rangeSlider_lat_dis" native="true">
+    <property name="geometry">
+     <rect>
+      <x>1400</x>
+      <y>160</y>
+      <width>400</width>
+      <height>50</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_lat_dis">
+    <property name="geometry">
+     <rect>
+      <x>1400</x>
+      <y>110</y>
+      <width>400</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>latitude distance</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="RangeSlider" name="rangeSlider_oncom_v" native="true">
+    <property name="geometry">
+     <rect>
+      <x>1400</x>
+      <y>260</y>
+      <width>400</width>
+      <height>50</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_oncom_v">
+    <property name="geometry">
+     <rect>
+      <x>1400</x>
+      <y>210</y>
+      <width>400</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>oncoming velocity</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="RangeSlider" name="rangeSlider_depart_v" native="true">
+    <property name="geometry">
+     <rect>
+      <x>1400</x>
+      <y>360</y>
+      <width>400</width>
+      <height>50</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_depart_v">
+    <property name="geometry">
+     <rect>
+      <x>1400</x>
+      <y>310</y>
+      <width>400</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>departing velocity</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_angle">
+    <property name="geometry">
+     <rect>
+      <x>1400</x>
+      <y>410</y>
+      <width>400</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Angle</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="Slider" name="Slider_angle" native="true">
+    <property name="geometry">
+     <rect>
+      <x>1400</x>
+      <y>460</y>
+      <width>400</width>
+      <height>50</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1350</width>
+     <width>1850</width>
      <height>23</height>
     </rect>
    </property>
@@ -103,6 +258,20 @@
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>RangeSlider</class>
+   <extends>QWidget</extends>
+   <header location="global">RangeSlider.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Slider</class>
+   <extends>QWidget</extends>
+   <header location="global">slider.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

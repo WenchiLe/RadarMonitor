@@ -36,6 +36,35 @@ MainWindow::MainWindow(QWidget *parent) :
     radarID = 0;
     roadID = 0;
     scale_pixmap_Map = 1;
+
+    rangeSlider_long_dis = ui->rangeSlider_long_dis;
+    rangeSlider_lat_dis = ui->rangeSlider_lat_dis;
+    rangeSlider_oncom_v = ui->rangeSlider_oncom_v;
+    rangeSlider_depart_v = ui->rangeSlider_depart_v;
+    Slider_angle = ui->Slider_angle;
+
+    rangeSlider_long_dis->SetMaximum(260);
+    rangeSlider_long_dis->SetMinimum(0);
+    rangeSlider_long_dis->SetUpperValue(260);
+    rangeSlider_long_dis->SetLowerValue(0);
+
+    rangeSlider_lat_dis->SetMaximum(260);
+    rangeSlider_lat_dis->SetMinimum(0);
+    rangeSlider_lat_dis->SetUpperValue(260);
+    rangeSlider_lat_dis->SetLowerValue(0);
+
+    rangeSlider_oncom_v->SetMaximum(260);
+    rangeSlider_oncom_v->SetMinimum(0);
+    rangeSlider_oncom_v->SetUpperValue(260);
+    rangeSlider_oncom_v->SetLowerValue(0);
+
+    rangeSlider_depart_v->SetMaximum(260);
+    rangeSlider_depart_v->SetMinimum(0);
+    rangeSlider_depart_v->SetUpperValue(260);
+    rangeSlider_depart_v->SetLowerValue(0);
+
+    Slider_angle->SetRange(-90,90);
+    Slider_angle->SetValue(0);
 }
 
 MainWindow::~MainWindow()

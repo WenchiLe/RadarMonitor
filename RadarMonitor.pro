@@ -35,7 +35,10 @@ SOURCES += \
     getlicenseplatethread.cpp \
     licenseplateunit.cpp \
     radarradarcomparethread.cpp \
-    licenseradarcomparethread.cpp
+    licenseradarcomparethread.cpp \
+    receivedatafromserver.cpp \
+    RangeSlider.cpp \
+    slider.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -47,12 +50,17 @@ HEADERS += \
     getlicenseplatethread.h \
     licenseplateunit.h \
     radarradarcomparethread.h \
-    licenseradarcomparethread.h
+    licenseradarcomparethread.h \
+    receivedatafromserver.h \
+    RangeSlider.h \
+    slider.h
 
 FORMS += \
         mainwindow.ui
 
 LIBS += -lws2_32
+
+QT += network
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

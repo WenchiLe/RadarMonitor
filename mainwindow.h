@@ -11,6 +11,8 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QCloseEvent>
+#include "RangeSlider.h"
+#include "Slider.h"
 
 #define ROADNUM 2
 
@@ -67,6 +69,12 @@ private:
     QMap<int,bool> map_can_showDetail;
 
     qreal carAngle = 0;
+
+    RangeSlider *rangeSlider_long_dis;
+    RangeSlider *rangeSlider_lat_dis;
+    RangeSlider *rangeSlider_oncom_v;
+    RangeSlider *rangeSlider_depart_v;
+    Slider *Slider_angle;
 
 protected:
     void paintEvent(QPaintEvent *);
