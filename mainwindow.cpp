@@ -185,8 +185,34 @@ void MainWindow::paintEvent(QPaintEvent *)
         QMatrix matrix;
         float vy = lastFrame60Bs.frame[j][3];
         float vx = -lastFrame60Bs.frame[j][4];
-        carAngle = qAtan(vy/vx);
-        matrix.rotate(qRadiansToDegrees(carAngle));
+        if(qAbs(vx) == 0)
+        {
+            if(vy>=0)
+            {
+                carAngle = 0;
+            }
+            else
+            {
+                carAngle = 90;
+            }
+        }
+        else
+        {
+            if(vx>0)
+            {
+                carAngle = 90-qRadiansToDegrees(qAtan(vy/vx));
+            }
+            else
+            {
+                carAngle = -90-qRadiansToDegrees(qAtan(vy/vx));
+            }
+            if(qAbs(carAngle)>80)
+            {
+                std::cout<<"vx: "<<vx<<" vy: "<<vy<<std::endl;
+                std::cout<<"carAngle: "<<carAngle<<std::endl;
+            }
+        }
+        matrix.rotate(carAngle);
         pix = pix.transformed(matrix,Qt::SmoothTransformation);
         carPainter.drawPixmap(x-6,y-13,pix);
     }
