@@ -46,6 +46,64 @@ void Slider::paintEvent(QPaintEvent* aEvent)
 
 }
 
+void Slider::mousePressEvent(QMouseEvent* aEvent)
+{
+    if(aEvent->buttons() & Qt::LeftButton)
+    {
+        //mSecondHandlePressed = secondHandleRect().contains(aEvent->pos());
+        mFirstHandlePressed = !mSecondHandlePressed && firstHandleRect().contains(aEvent->pos());
+        if(mFirstHandlePressed)
+        {
+            mDelta = aEvent->pos().x() - (firstHandleRect().x() + scHandleSideLength / 2);
+        }
+//        else if(mSecondHandlePressed)
+//        {
+//            mDelta = aEvent->pos().x() - (secondHandleRect().x() + scHandleSideLength / 2);
+//        }
+        if(aEvent->pos().y() >= 2
+                && aEvent->pos().y() <= height()- 2)
+        {
+            int step = mInterval / 10 < 1 ? 1 : mInterval / 10;
+            if(aEvent->pos().x() < firstHandleRect().x())
+            {
+                setLowerValue(mLowerValue - step);
+            }
+            else if(aEvent->pos().x() > firstHandleRect().x() + scHandleSideLength
+                    && aEvent->pos().x() < secondHandleRect().x())
+            {
+                if(aEvent->pos().x() - (firstHandleRect().x() + scHandleSideLength) <
+                        (secondHandleRect().x() - (firstHandleRect().x() + scHandleSideLength)) / 2)
+                {
+                    if(mLowerValue + step < mUpperValue)
+                    {
+                        setLowerValue(mLowerValue + step);
+                    }
+                    else
+                    {
+                        setLowerValue(mUpperValue);
+                    }
+                }
+                else
+                {
+                    if(mUpperValue - step > mLowerValue)
+                    {
+                        setUpperValue(mUpperValue - step);
+                    }
+                    else
+                    {
+                        setUpperValue(mLowerValue);
+                    }
+                }
+            }
+            else if(aEvent->pos().x() > secondHandleRect().x() + scHandleSideLength)
+            {
+                setUpperValue(mUpperValue + step);
+            }
+        }
+    }
+}
+
+
 QRectF Slider::firstHandleRect()
 {
     float percentage = (mLowerValue - mMinimum) * 1.0 / mInterval;

@@ -13,6 +13,7 @@ public:
 
 protected:
     void paintEvent(QPaintEvent* aEvent) override;
+    void mousePressEvent(QMouseEvent* aEvent) override;
     int validWidth();
     QRectF firstHandleRect();
 };

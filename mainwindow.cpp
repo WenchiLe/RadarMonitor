@@ -12,12 +12,20 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->setFixedSize( this->width (),this->height ());
 
+    qRegisterMetaType<QVector<SendConfig::ScaleSetInfo>>("QVector<SendConfig::ScaleSetInfo>");
+    qRegisterMetaType<SendConfig::ScaleSetInfo>("SendConfig::ScaleSetInfo");
+
     connect(&getFramesThread, SIGNAL(FramesChanged(ReceiveData::Frame60Bs)),
             this, SLOT(NewFramesCome(ReceiveData::Frame60Bs)));
     connect(&getFramesThread, SIGNAL(ToStoreFrames(ReceiveData::Frame60Bs)),
             &radarFrameProcessThread, SLOT(StoreNewFrames(ReceiveData::Frame60Bs)));
     connect(&getLicensePlateThread, SIGNAL(LicensePlateChanged(ReceiveLicensePlate::carLicense)),
             &radarFrameProcessThread, SLOT(StoreLicensePlate(ReceiveLicensePlate::carLicense)));
+
+    connect(this, SIGNAL(SetConfig(QVector<SendConfig::ScaleSetInfo>)),
+            &sendConfig, SLOT(GetConfig(QVector<SendConfig::ScaleSetInfo>)));
+    connect(&sendConfig, SIGNAL(SendConfigMsg(bool)),
+            this, SLOT(ReceiveSentConfigMsg(bool)));
 
     lastFrame60Bs.length = 0;
     getLicensePlateThread.start();
@@ -173,19 +181,29 @@ void MainWindow::paintEvent(QPaintEvent *)
     }
 
     //draw the objects in pixmap_Car
+    carPainter.save();
+    carPainter.translate(350,840);
+    qreal rotateAngleDegree = Slider_angle->GetValue();
+    qreal rotateAngleRadian = qDegreesToRadians(rotateAngleDegree);
+    carPainter.rotate(rotateAngleDegree);
     QPen pen;
     pen.setColor(QColor(0, 0, 0,255));
     carPainter.setPen(pen);
     QBrush brush(Qt::white);
     carPainter.setBrush(brush);
+    QPoint cursorPointInPixCar_trans;
+    cursorPointInPixCar_trans.setX((cursorPointInPixCar.x()-350)*qCos(rotateAngleRadian)+(cursorPointInPixCar.y()-840)*qSin(rotateAngleRadian));
+    cursorPointInPixCar_trans.setY((cursorPointInPixCar.y()-840)*qCos(rotateAngleRadian)-(cursorPointInPixCar.x()-350)*qSin(rotateAngleRadian));
     for(int j=0;j<lastFrame60Bs.length;j++)
     {
-        int x = (int)(350 - (lastFrame60Bs.frame[j][2]*6));
-        int y = (int)(840 - lastFrame60Bs.frame[j][1]*3);
+        //        int x = (int)(350 - (lastFrame60Bs.frame[j][2]*6));
+        //        int y = (int)(840 - lastFrame60Bs.frame[j][1]*3);
+        int x = (int)(-(lastFrame60Bs.frame[j][2]*6));
+        int y = (int)(-lastFrame60Bs.frame[j][1]*3);
         int objID = lastFrame60Bs.frame[j][0];
 
         //QPoint pointDis = cursorPointInPix - QPoint(x,y);
-        double pointDis = sqrt(pow(cursorPointInPixCar.x()-x, 2) + pow(cursorPointInPixCar.y()-y, 2));
+        double pointDis = sqrt(pow(cursorPointInPixCar_trans.x()-x, 2) + pow(cursorPointInPixCar_trans.y()-y, 2));
         if (pointDis <= 10)
         {
             //            cout<<pointDis<<endl;
@@ -235,11 +253,11 @@ void MainWindow::paintEvent(QPaintEvent *)
             {
                 carAngle = -90-qRadiansToDegrees(qAtan(vy/vx));
             }
-            if(qAbs(carAngle)>80)
-            {
-                std::cout<<"vx: "<<vx<<" vy: "<<vy<<std::endl;
-                std::cout<<"carAngle: "<<carAngle<<std::endl;
-            }
+            //            if(qAbs(carAngle)>80)
+            //            {
+            //                std::cout<<"vx: "<<vx<<" vy: "<<vy<<std::endl;
+            //                std::cout<<"carAngle: "<<carAngle<<std::endl;
+            //            }
         }
         matrix.rotate(carAngle);
         pix = pix.transformed(matrix,Qt::SmoothTransformation);
@@ -252,8 +270,10 @@ void MainWindow::paintEvent(QPaintEvent *)
         int objID = lastFrame60Bs.frame[j][0];
         if(map_can_showDetail.value(objID,false))
         {
-            int x = (int)(350 - (lastFrame60Bs.frame[j][2]*6));
-            int y = (int)(840 - lastFrame60Bs.frame[j][1]*3);
+            //            int x = (int)(350 - (lastFrame60Bs.frame[j][2]*6));
+            //            int y = (int)(840 - lastFrame60Bs.frame[j][1]*3);
+            int x = (int)(-(lastFrame60Bs.frame[j][2]*6));
+            int y = (int)(-lastFrame60Bs.frame[j][1]*3);
             float velocity = qSqrt(qPow(lastFrame60Bs.frame[j][3],2)+qPow(lastFrame60Bs.frame[j][4],2))*3.6;
             QString license = radarFrameProcessThread.GetLicense(radarID,objID);
             float dis_long = lastFrame60Bs.frame[j][1];
@@ -267,6 +287,7 @@ void MainWindow::paintEvent(QPaintEvent *)
     }
 
     //draw the licenese plate
+    carPainter.restore();
     switch (roadID) {
     case 0:
         if(radarID == 0)//the license plate is near the first radar
@@ -433,4 +454,77 @@ void MainWindow::on_pushButton_road_shrink_clicked()
 {
     roadZoom[roadID]--;
     update();
+}
+
+void MainWindow::on_Btn_submit_clicked()
+{
+    rangeSlider_long_dis = ui->rangeSlider_long_dis;
+    rangeSlider_lat_dis = ui->rangeSlider_lat_dis;
+    rangeSlider_oncom_v = ui->rangeSlider_oncom_v;
+    rangeSlider_depart_v = ui->rangeSlider_depart_v;
+    Slider_angle = ui->Slider_angle;
+
+    QVector<SendConfig::ScaleSetInfo> ScaleSetInfoS;
+    float min;
+    float max;
+    min = rangeSlider_long_dis->GetLowerValue();
+    max = rangeSlider_long_dis->GetUpperValue();
+
+    SendConfig::ScaleSetInfo scaleSetInfo;
+    scaleSetInfo.index = 0;
+    scaleSetInfo.min = min;
+    scaleSetInfo.max = max;
+    ScaleSetInfoS.append(scaleSetInfo);
+
+
+    min = rangeSlider_lat_dis->GetLowerValue();
+    max = rangeSlider_lat_dis->GetUpperValue();
+
+    scaleSetInfo.index = 1;
+    scaleSetInfo.min = min;
+    scaleSetInfo.max = max;
+    ScaleSetInfoS.append(scaleSetInfo);
+
+    min = rangeSlider_oncom_v->GetLowerValue();
+    max = rangeSlider_oncom_v->GetUpperValue();
+
+    scaleSetInfo.index = 2;
+    scaleSetInfo.min = min;
+    scaleSetInfo.max = max;
+    ScaleSetInfoS.append(scaleSetInfo);
+
+    min = rangeSlider_depart_v->GetLowerValue();
+    max = rangeSlider_depart_v->GetUpperValue();
+
+    scaleSetInfo.index = 3;
+    scaleSetInfo.min = min;
+    scaleSetInfo.max = max;
+    ScaleSetInfoS.append(scaleSetInfo);
+
+    min = Slider_angle->GetValue();
+    max = Slider_angle->GetValue();
+
+    scaleSetInfo.index = 4;
+    scaleSetInfo.min = min;
+    scaleSetInfo.max = max;
+    ScaleSetInfoS.append(scaleSetInfo);
+
+    Slider_angle->SetValue(0);
+
+    emit SetConfig(ScaleSetInfoS);
+    sendConfig.start();
+}
+
+void MainWindow::ReceiveSentConfigMsg(bool flag)
+{
+    if(flag)
+    {
+        QMessageBox::information(this, tr("设置信息发送状态"),
+                                 tr("设置信息发送成功"),
+                                 QMessageBox::Ok);
+    }else{
+        QMessageBox::critical(this, tr("设置信息发送状态"),
+                              tr("设置信息发送失败"),
+                              QMessageBox::Ok);
+    }
 }

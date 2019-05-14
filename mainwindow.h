@@ -11,8 +11,10 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QCloseEvent>
+#include <QMessageBox>
 #include "RangeSlider.h"
 #include "Slider.h"
+#include "sendconfig.h"
 
 #define ROADNUM 2
 
@@ -76,6 +78,8 @@ private:
     RangeSlider *rangeSlider_depart_v;
     Slider *Slider_angle;
 
+    SendConfig sendConfig;
+
 protected:
     void paintEvent(QPaintEvent *);
     void mousePressEvent(QMouseEvent *);
@@ -90,6 +94,11 @@ private slots:
     void on_pushButton_road_right_clicked();
     void on_pushButton_road_enlarge_clicked();
     void on_pushButton_road_shrink_clicked();
+    void on_Btn_submit_clicked();
+    void ReceiveSentConfigMsg(bool flag);
+
+signals:
+    void SetConfig(QVector<SendConfig::ScaleSetInfo> ScaleSetInfoS);
 };
 
 #endif // MAINWINDOW_H

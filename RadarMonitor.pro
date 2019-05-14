@@ -38,7 +38,8 @@ SOURCES += \
     licenseradarcomparethread.cpp \
     receivedatafromserver.cpp \
     RangeSlider.cpp \
-    slider.cpp
+    slider.cpp \
+    sendconfig.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -53,7 +54,8 @@ HEADERS += \
     licenseradarcomparethread.h \
     receivedatafromserver.h \
     RangeSlider.h \
-    slider.h
+    slider.h \
+    sendconfig.h
 
 FORMS += \
         mainwindow.ui
