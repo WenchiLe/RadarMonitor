@@ -27,6 +27,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&sendConfig, SIGNAL(SendConfigMsg(bool)),
             this, SLOT(ReceiveSentConfigMsg(bool)));
 
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
+    timer->start(1);
+
     lastFrame60Bs.length = 0;
     getLicensePlateThread.start();
     getFramesThread.start();
@@ -321,6 +325,9 @@ void MainWindow::paintEvent(QPaintEvent *)
     //other process after screen had been drawn
     cursorPointInPixCar.setX(-10000);
     cursorPointInPixCar.setY(-10000);
+
+    //restart the timer
+    timer->start();
 }
 
 void MainWindow::NewFramesCome(ReceiveData::Frame60Bs frame60Bs)
@@ -458,12 +465,6 @@ void MainWindow::on_pushButton_road_shrink_clicked()
 
 void MainWindow::on_Btn_submit_clicked()
 {
-    rangeSlider_long_dis = ui->rangeSlider_long_dis;
-    rangeSlider_lat_dis = ui->rangeSlider_lat_dis;
-    rangeSlider_oncom_v = ui->rangeSlider_oncom_v;
-    rangeSlider_depart_v = ui->rangeSlider_depart_v;
-    Slider_angle = ui->Slider_angle;
-
     QVector<SendConfig::ScaleSetInfo> ScaleSetInfoS;
     float min;
     float max;
@@ -527,4 +528,9 @@ void MainWindow::ReceiveSentConfigMsg(bool flag)
                               tr("设置信息发送失败"),
                               QMessageBox::Ok);
     }
+}
+
+void MainWindow::timerUpdate()
+{
+    update();
 }

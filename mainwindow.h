@@ -11,7 +11,10 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QCloseEvent>
+#include <QTimer>
+#include <QDateTime>
 #include <QMessageBox>
+#include <QDebug>
 #include "RangeSlider.h"
 #include "Slider.h"
 #include "sendconfig.h"
@@ -80,6 +83,8 @@ private:
 
     SendConfig sendConfig;
 
+    QTimer *timer;
+
 protected:
     void paintEvent(QPaintEvent *);
     void mousePressEvent(QMouseEvent *);
@@ -96,6 +101,7 @@ private slots:
     void on_pushButton_road_shrink_clicked();
     void on_Btn_submit_clicked();
     void ReceiveSentConfigMsg(bool flag);
+    void timerUpdate();
 
 signals:
     void SetConfig(QVector<SendConfig::ScaleSetInfo> ScaleSetInfoS);
