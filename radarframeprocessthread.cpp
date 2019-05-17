@@ -37,15 +37,15 @@ void RadarFrameProcessThread::Stop()
     }
 }
 
-void RadarFrameProcessThread::StoreNewFrames(ReceiveData::Frame60Bs frame60Bs)
+void RadarFrameProcessThread::StoreNewFrames(ReceiveDataFromServer::Frame60Bs frame60Bs)
 {
-    if(frame60Bs.radar_ID>=1&&frame60Bs.radar_ID<=RADAR_NUMS)
+    if(frame60Bs.radarId>=1&&frame60Bs.radarId<=RADAR_NUMS)
     {
-        vector_RadarUnitData[frame60Bs.radar_ID-1].PushNewFrame(frame60Bs);
+        vector_RadarUnitData[frame60Bs.radarId-1].PushNewFrame(frame60Bs);
     }
 }
 
-void RadarFrameProcessThread::StoreLicensePlate(ReceiveLicensePlate::carLicense carLicense)
+void RadarFrameProcessThread::StoreLicensePlate(ReceiveDataFromServer::CarLicense carLicense)
 {
     licensePlateUnit.PushNewFrame(carLicense);
 }

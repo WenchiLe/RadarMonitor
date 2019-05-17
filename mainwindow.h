@@ -6,6 +6,7 @@
 #include <getframesthread.h>
 #include <radarframeprocessthread.h>
 #include <getlicenseplatethread.h>
+#include <receivedatafromserver.h>
 #include <QtMath>
 #include <QMap>
 #include <QMouseEvent>
@@ -27,10 +28,12 @@ public:
 private:
     Ui::MainWindow *ui;
 
-    GetFramesThread getFramesThread;
-    GetLicensePlateThread getLicensePlateThread;
+    GetFramesThread *getFramesThread;
+    GetLicensePlateThread *getLicensePlateThread;
     RadarFrameProcessThread radarFrameProcessThread;
-    ReceiveData::Frame60Bs lastFrame60Bs;
+    ReceiveDataFromServer::Frame60Bs lastFrame60Bs;
+
+    ReceiveDataFromServer receiveDataFromServer;
 
     QPoint point_location_pixmap_Car;
     QPoint point_location_pixmap_Map;
@@ -71,7 +74,7 @@ protected:
     void closeEvent(QCloseEvent *event);
 
 private slots:
-    void NewFramesCome(ReceiveData::Frame60Bs frame60Bs);
+    void NewFramesCome(ReceiveDataFromServer::Frame60Bs frame60Bs);
 };
 
 #endif // MAINWINDOW_H

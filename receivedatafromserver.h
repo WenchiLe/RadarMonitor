@@ -48,7 +48,8 @@ public:
 
     int ListenFlag = 0;
 
-    QMutex mutex;
+    QMutex mutexFrame60Bs;
+    QMutex mutexCarLicense;
     QQueue<Frame60Bs> queueFrame60Bs;
     QQueue<CarLicense> queueCarLicense;
 
@@ -63,6 +64,10 @@ public:
     void StopReceiveData();
     void CarLicenseHandler (const char * buffer);
     void Frame60BsHandler (const char * buffer);
+    Frame60Bs GetQueueFrame60Bs();
+    bool HasFrame60Bs();
+    CarLicense GetQueueCarLicense();
+    bool HasCarLicense();
 
 protected:
     void run();

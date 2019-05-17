@@ -7,15 +7,15 @@ LicensePlateUnit::LicensePlateUnit()
 
 }
 
-void LicensePlateUnit::PushNewFrame(ReceiveLicensePlate::carLicense carLicense)
+void LicensePlateUnit::PushNewFrame(ReceiveDataFromServer::CarLicense carLicense)
 {
     LicensePlateUnit::carLicense mycar;
     mycar.time = carLicense.timeStamp;
     QString s(carLicense.license);
     mycar.license = s;
     mycar.latitude = carLicense.latitude;
-    mycar.longtitude = carLicense.longtitude;
-    mycar.speed = 0;
+    mycar.longtitude = carLicense.longitude;
+    mycar.speed = carLicense.speed;
     mutex.lock();
     queue_carLicense.enqueue(mycar);
     mutex.unlock();

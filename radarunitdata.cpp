@@ -12,20 +12,20 @@ void RadarUnitData::SetRadarLocation(QPoint point_radar_location)
     this->point_radar_location = point_radar_location;
 }
 
-void RadarUnitData::PushNewFrame(ReceiveData::Frame60Bs frame60Bs)
+void RadarUnitData::PushNewFrame(ReceiveDataFromServer::Frame60Bs frame60Bs)
 {
     RadarUnitData::Frame frame;
-    frame.time = frame60Bs.time;
+    frame.time = frame60Bs.timeStamp;
     frame.car_num = frame60Bs.length;
     frame.used = false;
     for(int i = 0; i < frame60Bs.length; i++)
     {
         RadarUnitData::CarInfo carInfo;
-        carInfo.objID = frame60Bs.frame[i][0];
-        carInfo.longtitude = frame60Bs.frame[i][1];
-        carInfo.latitude = frame60Bs.frame[i][2];
-        carInfo.longVelocity = frame60Bs.frame[i][3];
-        carInfo.latVelocity = frame60Bs.frame[i][4];
+        carInfo.objID = frame60Bs.frameData[i][0];
+        carInfo.longtitude = frame60Bs.frameData[i][1];
+        carInfo.latitude = frame60Bs.frameData[i][2];
+        carInfo.longVelocity = frame60Bs.frameData[i][3];
+        carInfo.latVelocity = frame60Bs.frameData[i][4];
         frame.cars.push_back(carInfo);
     }
     mutex.lock();

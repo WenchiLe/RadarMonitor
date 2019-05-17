@@ -15,6 +15,7 @@
 #include <iostream>
 #include <radarradarcomparethread.h>
 #include <licenseradarcomparethread.h>
+#include <receivedatafromserver.h>
 
 class RadarFrameProcessThread: public QObject
 {
@@ -33,8 +34,8 @@ private:
     LicenseRadarCompareThread *licenseRadarCompareThread;
 
 private slots:
-    void StoreNewFrames(ReceiveData::Frame60Bs frame60Bs);
-    void StoreLicensePlate(ReceiveLicensePlate::carLicense carLicense);
+    void StoreNewFrames(ReceiveDataFromServer::Frame60Bs frame60Bs);
+    void StoreLicensePlate(ReceiveDataFromServer::CarLicense carLicense);
 };
 
 #endif // RADARFRAMEPROCESSTHREAD_H

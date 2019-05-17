@@ -12,17 +12,21 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->setFixedSize( this->width (),this->height ());
 
-    connect(&getFramesThread, SIGNAL(FramesChanged(ReceiveData::Frame60Bs)),
-            this, SLOT(NewFramesCome(ReceiveData::Frame60Bs)));
-    connect(&getFramesThread, SIGNAL(ToStoreFrames(ReceiveData::Frame60Bs)),
-            &radarFrameProcessThread, SLOT(StoreNewFrames(ReceiveData::Frame60Bs)));
-    connect(&getLicensePlateThread, SIGNAL(LicensePlateChanged(ReceiveLicensePlate::carLicense)),
-            &radarFrameProcessThread, SLOT(StoreLicensePlate(ReceiveLicensePlate::carLicense)));
+    getLicensePlateThread = new GetLicensePlateThread(&receiveDataFromServer);
+    getFramesThread = new GetFramesThread(&receiveDataFromServer);
+
+    connect(getFramesThread, SIGNAL(FramesChanged(ReceiveDataFromServer::Frame60Bs)),
+            this, SLOT(NewFramesCome(ReceiveDataFromServer::Frame60Bs)));
+    connect(getFramesThread, SIGNAL(ToStoreFrames(ReceiveDataFromServer::Frame60Bs)),
+            &radarFrameProcessThread, SLOT(StoreNewFrames(ReceiveDataFromServer::Frame60Bs)));
+    connect(getLicensePlateThread, SIGNAL(LicensePlateChanged(ReceiveDataFromServer::CarLicense)),
+            &radarFrameProcessThread, SLOT(StoreLicensePlate(ReceiveDataFromServer::CarLicense)));
 
     lastFrame60Bs.length = 0;
-    getLicensePlateThread.start();
-    getFramesThread.start();
-    //radarFrameProcessThread.Start();
+    receiveDataFromServer.StartReceiveData();
+    getLicensePlateThread->start();
+    getFramesThread->start();
+    radarFrameProcessThread.Start();
 
     point_location_pixmap_Car = QPoint(0,13);
     point_location_pixmap_Map = QPoint(713,476);
@@ -93,7 +97,7 @@ void MainWindow::paintEvent(QPaintEvent *)
                     if(j!=3)
                     {
                         radarID = j;
-                        getFramesThread.SetRadarID(j);
+                        getFramesThread->SetRadarID(j);
                     }
 
                 }
@@ -155,9 +159,9 @@ void MainWindow::paintEvent(QPaintEvent *)
     //    cursorPointInPix.setY((cursorPoint.y()-point_origin_pixmap_Car.y()-point_location_pixmap_Car.y())/scale_pixmap_Car);
     for(int j=0;j<lastFrame60Bs.length;j++)
     {
-        int x = (int)(350 - (lastFrame60Bs.frame[j][2]*6));
-        int y = (int)(840 - lastFrame60Bs.frame[j][1]*3);
-        int objID = lastFrame60Bs.frame[j][0];
+        int x = (int)(350 - (lastFrame60Bs.frameData[j][2]*6));
+        int y = (int)(840 - lastFrame60Bs.frameData[j][1]*3);
+        int objID = lastFrame60Bs.frameData[j][0];
 
         //QPoint pointDis = cursorPointInPix - QPoint(x,y);
         double pointDis = sqrt(pow(cursorPointInPixCar.x()-x, 2) + pow(cursorPointInPixCar.y()-y, 2));
@@ -199,15 +203,15 @@ void MainWindow::paintEvent(QPaintEvent *)
     //draw detail
     for(int j=0;j<lastFrame60Bs.length;j++)
     {
-        int objID = lastFrame60Bs.frame[j][0];
+        int objID = lastFrame60Bs.frameData[j][0];
         if(map_can_showDetail.value(objID,false))
         {
-            int x = (int)(350 - (lastFrame60Bs.frame[j][2]*6));
-            int y = (int)(840 - lastFrame60Bs.frame[j][1]*3);
-            float velocity = qSqrt(qPow(lastFrame60Bs.frame[j][3],2)+qPow(lastFrame60Bs.frame[j][4],2))*3.6;
+            int x = (int)(350 - (lastFrame60Bs.frameData[j][2]*6));
+            int y = (int)(840 - lastFrame60Bs.frameData[j][1]*3);
+            float velocity = qSqrt(qPow(lastFrame60Bs.frameData[j][3],2)+qPow(lastFrame60Bs.frameData[j][4],2))*3.6;
             QString license = radarFrameProcessThread.GetLicense(radarID,objID);
-            float dis_long = lastFrame60Bs.frame[j][1];
-            float dis_lat = lastFrame60Bs.frame[j][2];
+            float dis_long = lastFrame60Bs.frameData[j][1];
+            float dis_lat = lastFrame60Bs.frameData[j][2];
             carPainter.drawRect(x+6,y-12,90,50);
             carPainter.drawText(x+11,y, license.replace("AKB*","沪A·"));
             carPainter.drawText(x+11,y+11, QString::number(velocity,'f',0)+"km/h");
@@ -252,7 +256,7 @@ void MainWindow::paintEvent(QPaintEvent *)
     cursorPointInPixCar.setY(-10000);
 }
 
-void MainWindow::NewFramesCome(ReceiveData::Frame60Bs frame60Bs)
+void MainWindow::NewFramesCome(ReceiveDataFromServer::Frame60Bs frame60Bs)
 {
     //std::cout<<frame60Bs.length<<std::endl;
     lastFrame60Bs = frame60Bs;
@@ -356,7 +360,7 @@ void MainWindow::wheelEvent(QWheelEvent *event)
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     //std::cout<<"forced to stop"<<std::endl;
-    getLicensePlateThread.Stop();
-    getFramesThread.Stop();
+    getLicensePlateThread->Stop();
+    getFramesThread->Stop();
     radarFrameProcessThread.Stop();
 }
