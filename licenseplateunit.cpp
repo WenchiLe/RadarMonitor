@@ -26,9 +26,9 @@ LicensePlateUnit::carLicense LicensePlateUnit::FetchFrame()
     LicensePlateUnit::carLicense mycar;
     mycar.time = 0;
     mutex.lock();
-    if(!queue_carLicense.isEmpty())
+    if (!queue_carLicense.isEmpty())
     {
-        mycar = queue_carLicense.dequeue();
+    mycar = queue_carLicense.dequeue();
     }
     mutex.unlock();
     return mycar;
@@ -38,9 +38,9 @@ bool LicensePlateUnit::HasFrame()
 {
     bool hasFrame = false;
     mutex.lock();
-    if(!queue_carLicense.isEmpty())
+    if (!queue_carLicense.isEmpty())
     {
-        hasFrame = true;
+    hasFrame = true;
     }
     mutex.unlock();
     return hasFrame;

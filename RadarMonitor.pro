@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
+QT       += network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -36,7 +37,8 @@ SOURCES += \
     licenseplateunit.cpp \
     radarradarcomparethread.cpp \
     licenseradarcomparethread.cpp \
-    receivedatafromserver.cpp
+    receivedatafromserver.cpp \
+    filedownloader.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -49,7 +51,8 @@ HEADERS += \
     licenseplateunit.h \
     radarradarcomparethread.h \
     licenseradarcomparethread.h \
-    receivedatafromserver.h
+    receivedatafromserver.h \
+    filedownloader.h
 
 FORMS += \
         mainwindow.ui

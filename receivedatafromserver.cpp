@@ -17,7 +17,7 @@ ReceiveDataFromServer::ReceiveDataFromServer()
 void ReceiveDataFromServer::CarLicenseHandler (const char * buffer)
 {
     const CarLicense * carLicense = reinterpret_cast<const CarLicense *>(buffer);
-    std::cout<<"license: "<<carLicense->license<<std::endl;
+    //std::cout<<"license: "<<carLicense->license<<std::endl;
     // todo
     mutexCarLicense.lock();
     queueCarLicense.enqueue(*carLicense);
@@ -27,7 +27,7 @@ void ReceiveDataFromServer::CarLicenseHandler (const char * buffer)
 void ReceiveDataFromServer::Frame60BsHandler (const char * buffer)
 {
     const Frame60Bs * frame60Bs = reinterpret_cast<const Frame60Bs *>(buffer);
-    std::cout<<"frame: "<<frame60Bs->length<<std::endl;
+    //std::cout<<"frame: "<<frame60Bs->length<<std::endl;
     // todo
     mutexFrame60Bs.lock();
     queueFrame60Bs.enqueue(*frame60Bs);
@@ -41,31 +41,33 @@ void ReceiveDataFromServer::readData()
             return;
         }
         in.readRawData(reinterpret_cast<char *>(&magicHeader),sizeof(MagicHeader));
-        std::cout<<"head number: "<<magicHeader.number<<std::endl;
+        //std::cout<<"head number: "<<magicHeader.number<<std::endl;
         readHeadOrBody = "body";
     }
     if (client->bytesAvailable() < magicHeader.packetLength) {
         return;
     }
 
-    char buffer[magicHeader.packetLength];
-    in.readRawData(buffer, magicHeader.packetLength);
+    if(magicHeader.packetLength > 0)
+    {
+        char buffer[magicHeader.packetLength];
+        in.readRawData(buffer, magicHeader.packetLength);
 
-    switch(magicHeader.number) {
-    case 0x20:
-        CarLicenseHandler(buffer);
-        break;
-    case 0x30:
-        Frame60BsHandler(buffer);
-        break;
-    default:
-        // todo: error
-        break;
+        switch(magicHeader.number) {
+        case 0x20:
+            CarLicenseHandler(buffer);
+            break;
+        case 0x30:
+            Frame60BsHandler(buffer);
+            break;
+        default:
+            // todo: error
+            break;
 
+        }
+        readHeadOrBody = "head";
     }
 
-
-    readHeadOrBody = "head";
     readData();
 }
 

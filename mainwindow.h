@@ -12,8 +12,12 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QCloseEvent>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include "filedownloader.h"
 
-namespace Ui {
+namespace Ui
+{
 class MainWindow;
 }
 
@@ -63,7 +67,10 @@ private:
     int radarID;
     int roadID;
 
-    QMap<int,bool> map_can_showDetail;
+    QMap<int, bool> map_can_showDetail;
+
+    FileDownloader *m_pImgCtrl;
+    QPixmap videoImage;
 
 protected:
     void paintEvent(QPaintEvent *);
@@ -75,6 +82,7 @@ protected:
 
 private slots:
     void NewFramesCome(ReceiveDataFromServer::Frame60Bs frame60Bs);
+    void loadImage();
 };
 
 #endif // MAINWINDOW_H
