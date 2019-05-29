@@ -10,35 +10,45 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->centralWidget->setMouseTracking(true);
     setMouseTracking(true);
 
-    this->setFixedSize( this->width (),this->height ());
+    this->setFixedSize(this->width(), this->height());
 
     qRegisterMetaType<QVector<SendConfig::ScaleSetInfo>>("QVector<SendConfig::ScaleSetInfo>");
     qRegisterMetaType<SendConfig::ScaleSetInfo>("SendConfig::ScaleSetInfo");
 
-    connect(&getFramesThread, SIGNAL(FramesChanged(ReceiveData::Frame60Bs)),
-            this, SLOT(NewFramesCome(ReceiveData::Frame60Bs)));
-    connect(&getFramesThread, SIGNAL(ToStoreFrames(ReceiveData::Frame60Bs)),
-            &radarFrameProcessThread, SLOT(StoreNewFrames(ReceiveData::Frame60Bs)));
-    connect(&getLicensePlateThread, SIGNAL(LicensePlateChanged(ReceiveLicensePlate::carLicense)),
-            &radarFrameProcessThread, SLOT(StoreLicensePlate(ReceiveLicensePlate::carLicense)));
+    getLicensePlateThread = new GetLicensePlateThread(&receiveDataFromServer);
+    getFramesThread = new GetFramesThread(&receiveDataFromServer);
+
+    QUrl imageUrl("http://192.168.1.106:8080/cam_1.jpg");
+    m_pImgCtrl = new FileDownloader(imageUrl);
+
+    connect(getFramesThread, SIGNAL(FramesChanged(ReceiveDataFromServer::Frame60Bs)),
+        this, SLOT(NewFramesCome(ReceiveDataFromServer::Frame60Bs)));
+    connect(getFramesThread, SIGNAL(ToStoreFrames(ReceiveDataFromServer::Frame60Bs)),
+        &radarFrameProcessThread, SLOT(StoreNewFrames(ReceiveDataFromServer::Frame60Bs)));
+    connect(getLicensePlateThread, SIGNAL(LicensePlateChanged(ReceiveDataFromServer::CarLicense)),
+        &radarFrameProcessThread, SLOT(StoreLicensePlate(ReceiveDataFromServer::CarLicense)));
+    connect(m_pImgCtrl, SIGNAL(downloaded()), this, SLOT(loadImage()));
+
 
     connect(this, SIGNAL(SetConfig(QVector<SendConfig::ScaleSetInfo>)),
-            &sendConfig, SLOT(GetConfig(QVector<SendConfig::ScaleSetInfo>)));
+        &sendConfig, SLOT(GetConfig(QVector<SendConfig::ScaleSetInfo>)));
     connect(&sendConfig, SIGNAL(SendConfigMsg(bool)),
-            this, SLOT(ReceiveSentConfigMsg(bool)));
+        this, SLOT(ReceiveSentConfigMsg(bool)));
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
     timer->start(1);
 
     lastFrame60Bs.length = 0;
-    getLicensePlateThread.start();
-    getFramesThread.start();
+    receiveDataFromServer.StartReceiveData();
+    getLicensePlateThread->start();
+    getFramesThread->start();
     radarFrameProcessThread.Start();
+    m_pImgCtrl->start();
 
-    point_location_pixmap_Car = QPoint(0,13);
-    point_location_pixmap_Map = QPoint(713,476);
-    point_location_video = QPoint(713,13);
+    point_location_pixmap_Car = QPoint(0, 13);
+    point_location_pixmap_Map = QPoint(713, 476);
+    point_location_video = QPoint(713, 13);
 
     flag_translate_pixmap_Car = false;
     scale_pixmap_Car = 1;
@@ -75,7 +85,7 @@ MainWindow::MainWindow(QWidget *parent) :
     rangeSlider_depart_v->SetUpperValue(260);
     rangeSlider_depart_v->SetLowerValue(0);
 
-    Slider_angle->SetRange(-90,90);
+    Slider_angle->SetRange(-90, 90);
     Slider_angle->SetValue(0);
 }
 
@@ -106,215 +116,228 @@ void MainWindow::paintEvent(QPaintEvent *)
     mapPainter.translate(point_origin_pixmap_Map.x(), point_origin_pixmap_Map.y());
     mapPainter.scale(scale_pixmap_Map, scale_pixmap_Map);
 
+    QPainter videoPainter(&pixmap_Video);
+
     //draw point in pixmap_Map
     QPen penMap;
-    penMap.setColor(QColor(0, 0, 0,255));
+    penMap.setColor(QColor(0, 0, 0, 255));
     mapPainter.setPen(penMap);
-    QBrush brushMap(QColor(0, 255, 0,255));
+    QBrush brushMap(QColor(0, 255, 0, 255));
     mapPainter.setBrush(brushMap);
-    int x = 10,y = 10;
-    for(int j = 0; j < 4; j++)
+    int x = 10, y = 10;
+    for (int j = 0; j < 4; j++)
     {
-        double pointDis = sqrt(pow(cursorPointInPixMap.x()-x, 2) + pow(cursorPointInPixMap.y()-y, 2));
-        if(pointDis <= 10)
-        {
-            brushMap.setColor(QColor(255, 0, 0, 255));
-            mapPainter.setBrush(brushMap);
-            if(flag_can_send_radarID)
-            {
-                if(j==3)
-                {
-                    roadID = 1;
-                }else {
-                    roadID = 0;
-                }
-                if(j != radarID)
-                {
-                    map_can_showDetail.clear();
-                    if(j!=3)
-                    {
-                        radarID = j;
-                        getFramesThread.SetRadarID(j);
-                    }
-
-                }
-                //std::cout<<radarID<<std::endl;
-                flag_can_send_radarID = false;
-            }
-        }
-        mapPainter.drawEllipse(QPointF(x, y), 10, 10);
-        mapPainter.drawText(x-2,y+3, QString::number(j));
-        x += 30;
-        brushMap.setColor(QColor(0, 255, 0, 255));
+    double pointDis = sqrt(pow(cursorPointInPixMap.x() - x, 2) + pow(cursorPointInPixMap.y() - y, 2));
+    if (pointDis <= 10)
+    {
+        brushMap.setColor(QColor(255, 0, 0, 255));
         mapPainter.setBrush(brushMap);
+        if (flag_can_send_radarID)
+        {
+        if (j == 3)
+        {
+            roadID = 1;
+        }
+        else
+        {
+            roadID = 0;
+        }
+        if (j != radarID)
+        {
+            map_can_showDetail.clear();
+            if (j != 3)
+            {
+            radarID = j;
+            getFramesThread->SetRadarID(j);
+            }
+
+        }
+        //std::cout<<radarID<<std::endl;
+        flag_can_send_radarID = false;
+        }
+    }
+    mapPainter.drawEllipse(QPointF(x, y), 10, 10);
+    mapPainter.drawText(x - 2, y + 3, QString::number(j));
+    x += 30;
+    brushMap.setColor(QColor(0, 255, 0, 255));
+    mapPainter.setBrush(brushMap);
     }
 
     //draw the road in pixmap_Car
     QPixmap pix_Road;
-    switch (roadID) {
+    switch (roadID)
+    {
     case 0:
-        pix_Road.load("images/road.png");
-        carPainter.drawPixmap(245+roadOffSet[roadID],-100,209+roadZoom[roadID],1100,pix_Road);
-        break;
+    pix_Road.load("images/road.png");
+    carPainter.drawPixmap(245 + roadOffSet[roadID], -100, 209 + roadZoom[roadID], 1100, pix_Road);
+    break;
     case 1:
-        pix_Road.load("images/road4.png");
-        carPainter.drawPixmap(265+roadOffSet[roadID],-100,150+roadZoom[roadID],1100,pix_Road);
-        break;
+    pix_Road.load("images/road4.png");
+    carPainter.drawPixmap(265 + roadOffSet[roadID], -100, 150 + roadZoom[roadID], 1100, pix_Road);
+    break;
     }
 
 
     //draw the grid coordinate in pixmap_Car
     QPen penGrid;
-    penGrid.setColor(QColor(0, 0, 0,50));
+    penGrid.setColor(QColor(0, 0, 0, 50));
     carPainter.setPen(penGrid);
     int indexRow = 260;
     int indexColumn = 50;
-    for(int j = 1 ;j<=14;j++)
+    for (int j = 1 ; j <= 14; j++)
     {
-        carPainter.drawLine(QPointF(30, 60*j), QPointF(670, 60*j));//row
-        carPainter.drawText(10,60*j,QString::number(indexRow));
-        if(j==14) break;
-        indexRow -=20;
+    carPainter.drawLine(QPointF(30, 60 * j), QPointF(670, 60 * j)); //row
+    carPainter.drawText(10, 60 * j, QString::number(indexRow));
+    if (j == 14)
+        break;
+    indexRow -= 20;
     }
-    for(int j = 1; j<=11;j++)
+    for (int j = 1; j <= 11; j++)
     {
-        carPainter.drawLine(QPointF(50+60*(j-1), 10), QPointF(50+60*(j-1), 840));//column
-        carPainter.drawText(50+60*(j-1),860,QString::number(indexColumn));
-        //if(indexColumn == 0) std::cout<<50+60*(j-1)<<std::endl;
-        indexColumn -= 10;
+    carPainter.drawLine(QPointF(50 + 60 * (j - 1), 10), QPointF(50 + 60 * (j - 1), 840)); //column
+    carPainter.drawText(50 + 60 * (j - 1), 860, QString::number(indexColumn));
+    //if(indexColumn == 0) std::cout<<50+60*(j-1)<<std::endl;
+    indexColumn -= 10;
     }
 
     //draw the objects in pixmap_Car
     carPainter.save();
-    carPainter.translate(350,840);
+    carPainter.translate(350, 840);
     qreal rotateAngleDegree = Slider_angle->GetValue();
     qreal rotateAngleRadian = qDegreesToRadians(rotateAngleDegree);
     carPainter.rotate(rotateAngleDegree);
     QPen pen;
-    pen.setColor(QColor(0, 0, 0,255));
+    pen.setColor(QColor(0, 0, 0, 255));
     carPainter.setPen(pen);
     QBrush brush(Qt::white);
     carPainter.setBrush(brush);
     QPoint cursorPointInPixCar_trans;
-    cursorPointInPixCar_trans.setX((cursorPointInPixCar.x()-350)*qCos(rotateAngleRadian)+(cursorPointInPixCar.y()-840)*qSin(rotateAngleRadian));
-    cursorPointInPixCar_trans.setY((cursorPointInPixCar.y()-840)*qCos(rotateAngleRadian)-(cursorPointInPixCar.x()-350)*qSin(rotateAngleRadian));
-    for(int j=0;j<lastFrame60Bs.length;j++)
+    cursorPointInPixCar_trans.setX((cursorPointInPixCar.x() - 350)*qCos(rotateAngleRadian) + (cursorPointInPixCar.y() - 840)*qSin(rotateAngleRadian));
+    cursorPointInPixCar_trans.setY((cursorPointInPixCar.y() - 840)*qCos(rotateAngleRadian) - (cursorPointInPixCar.x() - 350)*qSin(rotateAngleRadian));
+    for (int j = 0; j < lastFrame60Bs.length; j++)
     {
-        //        int x = (int)(350 - (lastFrame60Bs.frame[j][2]*6));
-        //        int y = (int)(840 - lastFrame60Bs.frame[j][1]*3);
-        int x = (int)(-(lastFrame60Bs.frame[j][2]*6));
-        int y = (int)(-lastFrame60Bs.frame[j][1]*3);
-        int objID = lastFrame60Bs.frame[j][0];
+    //        int x = (int)(350 - (lastFrame60Bs.frame[j][2]*6));
+    //        int y = (int)(840 - lastFrame60Bs.frame[j][1]*3);
+    int x = (int)(-(lastFrame60Bs.frameData[j][2] * 6));
+    int y = (int)(-lastFrame60Bs.frameData[j][1] * 3);
+    int objID = lastFrame60Bs.frameData[j][0];
 
-        //QPoint pointDis = cursorPointInPix - QPoint(x,y);
-        double pointDis = sqrt(pow(cursorPointInPixCar_trans.x()-x, 2) + pow(cursorPointInPixCar_trans.y()-y, 2));
-        if (pointDis <= 10)
+    //QPoint pointDis = cursorPointInPix - QPoint(x,y);
+    double pointDis = sqrt(pow(cursorPointInPixCar_trans.x() - x, 2) + pow(cursorPointInPixCar_trans.y() - y, 2));
+    if (pointDis <= 10)
+    {
+        if (map_can_showDetail.value(objID, false))
         {
-            //            cout<<pointDis<<endl;
-            //            cout<<"X: "<<x<<" Y: "<<y<<endl;
-            //            cout<<"pointX: "<<cursorPointInPix.x()<<" pointY: "<<cursorPointInPix.y()<<endl;
-            //license = radarFrameProcessThread.GetLicense(radarID,objID);
-            if(map_can_showDetail.value(objID,false))
-            {
-                map_can_showDetail.insert(objID,false);
-                cursorPointInPixCar.setX(-10000);
-                cursorPointInPixCar.setY(-10000);
-            }
-            else
-            {
-                map_can_showDetail.insert(objID,true);
-                cursorPointInPixCar.setX(-10000);
-                cursorPointInPixCar.setY(-10000);
-            }
-
-            //            brush.setColor(QColor(255, 0, 0,255));
-            //            carPainter.setBrush(brush);
-        }
-        //                pen.setColor(QColor(0, 0, 0,255));
-        //                carPainter.setPen(pen); //
-        QPixmap pix("images/car.png");
-        QMatrix matrix;
-        float vy = lastFrame60Bs.frame[j][3];
-        float vx = -lastFrame60Bs.frame[j][4];
-        if(qAbs(vx) == 0)
-        {
-            if(vy>=0)
-            {
-                carAngle = 0;
-            }
-            else
-            {
-                carAngle = 90;
-            }
+        map_can_showDetail.insert(objID, false);
+        cursorPointInPixCar.setX(-10000);
+        cursorPointInPixCar.setY(-10000);
         }
         else
         {
-            if(vx>0)
-            {
-                carAngle = 90-qRadiansToDegrees(qAtan(vy/vx));
-            }
-            else
-            {
-                carAngle = -90-qRadiansToDegrees(qAtan(vy/vx));
-            }
-            //            if(qAbs(carAngle)>80)
-            //            {
-            //                std::cout<<"vx: "<<vx<<" vy: "<<vy<<std::endl;
-            //                std::cout<<"carAngle: "<<carAngle<<std::endl;
-            //            }
+        map_can_showDetail.insert(objID, true);
+        cursorPointInPixCar.setX(-10000);
+        cursorPointInPixCar.setY(-10000);
         }
-        matrix.rotate(carAngle);
-        pix = pix.transformed(matrix,Qt::SmoothTransformation);
-        carPainter.drawPixmap(x-6,y-13,pix);
+    }
+    //                pen.setColor(QColor(0, 0, 0,255));
+    //                carPainter.setPen(pen); //
+    QPixmap pix("images/car.png");
+    QMatrix matrix;
+    float vy = lastFrame60Bs.frameData[j][3];
+    float vx = -lastFrame60Bs.frameData[j][4];
+    if (qAbs(vx) == 0)
+    {
+        if (vy >= 0)
+        {
+        carAngle = 0;
+        }
+        else
+        {
+        carAngle = 90;
+        }
+    }
+    else
+    {
+        if (vx > 0)
+        {
+        carAngle = 90 - qRadiansToDegrees(qAtan(vy / vx));
+        }
+        else
+        {
+        carAngle = -90 - qRadiansToDegrees(qAtan(vy / vx));
+        }
+        //            if(qAbs(carAngle)>80)
+        //            {
+        //                std::cout<<"vx: "<<vx<<" vy: "<<vy<<std::endl;
+        //                std::cout<<"carAngle: "<<carAngle<<std::endl;
+        //            }
+    }
+    matrix.rotate(carAngle);
+    pix = pix.transformed(matrix, Qt::SmoothTransformation);
+    carPainter.drawPixmap(x - 6, y - 13, pix);
     }
 
     //draw detail
-    for(int j=0;j<lastFrame60Bs.length;j++)
+    for (int j = 0; j < lastFrame60Bs.length; j++)
     {
-        int objID = lastFrame60Bs.frame[j][0];
-        if(map_can_showDetail.value(objID,false))
-        {
-            //            int x = (int)(350 - (lastFrame60Bs.frame[j][2]*6));
-            //            int y = (int)(840 - lastFrame60Bs.frame[j][1]*3);
-            int x = (int)(-(lastFrame60Bs.frame[j][2]*6));
-            int y = (int)(-lastFrame60Bs.frame[j][1]*3);
-            float velocity = qSqrt(qPow(lastFrame60Bs.frame[j][3],2)+qPow(lastFrame60Bs.frame[j][4],2))*3.6;
-            QString license = radarFrameProcessThread.GetLicense(radarID,objID);
-            float dis_long = lastFrame60Bs.frame[j][1];
-            float dis_lat = lastFrame60Bs.frame[j][2];
-            carPainter.drawRect(x+6,y-12,90,50);
-            carPainter.drawText(x+11,y, license.replace("AKB*","沪A·"));
-            carPainter.drawText(x+11,y+11, QString::number(velocity,'f',0)+"km/h");
-            carPainter.drawText(x+11,y+22,"纵向坐标:"+QString::number(dis_long,'f',0)+"m");
-            carPainter.drawText(x+11,y+34,"横向坐标:"+QString::number(dis_lat,'f',0)+"m");
-        }
+    int objID = lastFrame60Bs.frameData[j][0];
+    if (map_can_showDetail.value(objID, false))
+    {
+        //            int x = (int)(350 - (lastFrame60Bs.frame[j][2]*6));
+        //            int y = (int)(840 - lastFrame60Bs.frame[j][1]*3);
+        int x = (int)(-(lastFrame60Bs.frameData[j][2] * 6));
+        int y = (int)(-lastFrame60Bs.frameData[j][1] * 3);
+        float velocity = qSqrt(qPow(lastFrame60Bs.frameData[j][3], 2) + qPow(lastFrame60Bs.frameData[j][4], 2)) * 3.6;
+        QString license = radarFrameProcessThread.GetLicense(radarID, objID);
+        float dis_long = lastFrame60Bs.frameData[j][1];
+        float dis_lat = lastFrame60Bs.frameData[j][2];
+        carPainter.drawRect(x + 6, y - 12, 90, 50);
+        carPainter.drawText(x + 11, y, license.replace("AKB*", "沪A·"));
+        carPainter.drawText(x + 11, y + 11, QString::number(velocity, 'f', 0) + "km/h");
+        carPainter.drawText(x + 11, y + 22, "纵向坐标:" + QString::number(dis_long, 'f', 0) + "m");
+        carPainter.drawText(x + 11, y + 34, "横向坐标:" + QString::number(dis_lat, 'f', 0) + "m");
+    }
     }
 
     //draw the licenese plate
     carPainter.restore();
-    switch (roadID) {
+    switch (roadID)
+    {
     case 0:
-        if(radarID == 0)//the license plate is near the first radar
+    if (radarID == 0) //the license plate is near the first radar
+    {
+        QPen penPlate(Qt::gray, 5);
+        carPainter.setPen(penPlate);
+        carPainter.drawLine(QPointF(230, 750), QPointF(470, 750));
+        penPlate.setColor(Qt::black);
+        carPainter.setPen(penPlate);
+        carPainter.setFont(QFont("times", 24));
+        carPainter.drawText(475, 760, "卡口");
+        for (int j = 1; j <= 5; j++)
         {
-            QPen penPlate(Qt::gray,5);
-            carPainter.setPen(penPlate);
-            carPainter.drawLine(QPointF(230+roadOffSet[roadID], 750), QPointF(470+roadOffSet[roadID]+roadZoom[roadID], 750));
-            penPlate.setColor(Qt::black);
-            carPainter.setPen(penPlate);
-            carPainter.setFont(QFont("times",24));
-            carPainter.drawText(475+roadOffSet[roadID]+roadZoom[roadID],760, "卡口");
-            for(int j = 1; j<=5;j++)
-            {
-                QPixmap pix_plate;
-                pix_plate.load("images/plate_white.png");
-                carPainter.drawPixmap(282+(j-1)*(30+roadZoom[roadID]/7)+roadOffSet[roadID],740,20+roadZoom[roadID],20,pix_plate);
-            }
+        QPen penPlate(Qt::gray, 5);
+        carPainter.setPen(penPlate);
+        carPainter.drawLine(QPointF(230 + roadOffSet[roadID], 750), QPointF(470 + roadOffSet[roadID] + roadZoom[roadID], 750));
+        penPlate.setColor(Qt::black);
+        carPainter.setPen(penPlate);
+        carPainter.setFont(QFont("times", 24));
+        carPainter.drawText(475 + roadOffSet[roadID] + roadZoom[roadID], 760, "卡口");
+        for (int j = 1; j <= 5; j++)
+        {
+            QPixmap pix_plate;
+            pix_plate.load("images/plate_white.png");
+            carPainter.drawPixmap(282 + (j - 1) * (30 + roadZoom[roadID] / 7) + roadOffSet[roadID], 740, 20 + roadZoom[roadID], 20, pix_plate);
         }
-        break;
+        }
+    }
+    break;
     case 1:
-        break;
+    break;
     }
 
+    //draw the video
+    videoPainter.drawPixmap(0, 0, 637, 450, videoImage);
+    m_pImgCtrl->exit();
 
     //draw the pixmaps on screen
     QPainter painter(this);
@@ -330,82 +353,92 @@ void MainWindow::paintEvent(QPaintEvent *)
     timer->start();
 }
 
-void MainWindow::NewFramesCome(ReceiveData::Frame60Bs frame60Bs)
+void MainWindow::NewFramesCome(ReceiveDataFromServer::Frame60Bs frame60Bs)
 {
     //std::cout<<frame60Bs.length<<std::endl;
     lastFrame60Bs = frame60Bs;
     update();
 }
 
+void MainWindow::loadImage()
+{
+    //std::cout << "loadImage" << std::endl;
+    videoImage.loadFromData(m_pImgCtrl->downloadedData());
+    update();
+}
+
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {
-    if(event->button()==Qt::LeftButton) //click the left button of mouse
+    if (event->button() == Qt::LeftButton) //click the left button of mouse
     {
-        //if(event->pos().x()<=(1570+pixmapLocation.x())&&event->pos().x()>=pixmapLocation.x()&&event->pos().y()<=(900+pixmapLocation.y())&&event->pos().y()>=pixmapLocation.y())
-        if(flag_isIn_pixmap_Car)
-        {
-            lastPoint = event->pos();
-            flag_translate_pixmap_Car = true;
-            cursorPointInPixCar.setX((cursorPoint.x()-point_origin_pixmap_Car.x()-point_location_pixmap_Car.x())/scale_pixmap_Car);
-            cursorPointInPixCar.setY((cursorPoint.y()-point_origin_pixmap_Car.y()-point_location_pixmap_Car.y())/scale_pixmap_Car);
-        }else{
-            flag_translate_pixmap_Car = false;
-        }
-        if(flag_isIn_pixmap_Map)
-        {
-            cursorPointInPixMap.setX((cursorPoint.x()-point_origin_pixmap_Map.x()-point_location_pixmap_Map.x())/scale_pixmap_Map);
-            cursorPointInPixMap.setY((cursorPoint.y()-point_origin_pixmap_Map.y()-point_location_pixmap_Map.y())/scale_pixmap_Map);
-            flag_can_send_radarID = true;
-            update();
-        }
-        //cout<<"point: "<<lastPoint.x()<<" "<<lastPoint.y()<<endl;
+    //if(event->pos().x()<=(1570+pixmapLocation.x())&&event->pos().x()>=pixmapLocation.x()&&event->pos().y()<=(900+pixmapLocation.y())&&event->pos().y()>=pixmapLocation.y())
+    if (flag_isIn_pixmap_Car)
+    {
+        lastPoint = event->pos();
+        flag_translate_pixmap_Car = true;
+        cursorPointInPixCar.setX((cursorPoint.x() - point_origin_pixmap_Car.x() - point_location_pixmap_Car.x()) / scale_pixmap_Car);
+        cursorPointInPixCar.setY((cursorPoint.y() - point_origin_pixmap_Car.y() - point_location_pixmap_Car.y()) / scale_pixmap_Car);
+    }
+    else
+    {
+        flag_translate_pixmap_Car = false;
+    }
+    if (flag_isIn_pixmap_Map)
+    {
+        cursorPointInPixMap.setX((cursorPoint.x() - point_origin_pixmap_Map.x() - point_location_pixmap_Map.x()) / scale_pixmap_Map);
+        cursorPointInPixMap.setY((cursorPoint.y() - point_origin_pixmap_Map.y() - point_location_pixmap_Map.y()) / scale_pixmap_Map);
+        flag_can_send_radarID = true;
+        update();
+    }
+    //cout<<"point: "<<lastPoint.x()<<" "<<lastPoint.y()<<endl;
     }
 }
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event)
 {
     cursorPoint = event->pos();
-    if(cursorPoint.x()<=(700+point_location_pixmap_Car.x())&&cursorPoint.x()>=point_location_pixmap_Car.x()&&cursorPoint.y()<=(900+point_location_pixmap_Car.y())&&cursorPoint.y()>point_location_pixmap_Car.y())
+    if (cursorPoint.x() <= (700 + point_location_pixmap_Car.x()) && cursorPoint.x() >= point_location_pixmap_Car.x() && cursorPoint.y() <= (900 + point_location_pixmap_Car.y()) && cursorPoint.y() > point_location_pixmap_Car.y())
     {
-        flag_isIn_pixmap_Car = true;
-        //cout<<cursorPoint.x()<<" "<<cursorPoint.y()<<endl;
+    flag_isIn_pixmap_Car = true;
+    //cout<<cursorPoint.x()<<" "<<cursorPoint.y()<<endl;
     }
-    else if(cursorPoint.x()<=(637+point_location_pixmap_Map.x())&&cursorPoint.x()>=point_location_pixmap_Map.x()&&cursorPoint.y()<=(437+point_location_pixmap_Map.y())&&cursorPoint.y()>point_location_pixmap_Map.y())
+    else if (cursorPoint.x() <= (637 + point_location_pixmap_Map.x()) && cursorPoint.x() >= point_location_pixmap_Map.x() && cursorPoint.y() <= (437 + point_location_pixmap_Map.y()) && cursorPoint.y() > point_location_pixmap_Map.y())
     {
-        flag_isIn_pixmap_Car = false;
-        flag_isIn_pixmap_Map = true;
-        //cout<<cursorPoint.x()<<" "<<cursorPoint.y()<<endl;
-    }else
-    {
-        flag_isIn_pixmap_Car = false;
-        flag_isIn_pixmap_Map = false;
+    flag_isIn_pixmap_Car = false;
+    flag_isIn_pixmap_Map = true;
+    //cout<<cursorPoint.x()<<" "<<cursorPoint.y()<<endl;
     }
-    if(event->buttons()&Qt::LeftButton) //click the left button of mouse while move the mouse
+    else
     {
-        if(flag_translate_pixmap_Car)
-        {
-            endPoint = event->pos();
-            point_origin_pixmap_Car.setX(point_origin_pixmap_Car.x()+(endPoint.x()-lastPoint.x()));
-            point_origin_pixmap_Car.setY(point_origin_pixmap_Car.y()+(endPoint.y()-lastPoint.y()));
-            update(); //draw the screen
-            lastPoint = endPoint;
-        }
+    flag_isIn_pixmap_Car = false;
+    flag_isIn_pixmap_Map = false;
+    }
+    if (event->buttons()&Qt::LeftButton) //click the left button of mouse while move the mouse
+    {
+    if (flag_translate_pixmap_Car)
+    {
+        endPoint = event->pos();
+        point_origin_pixmap_Car.setX(point_origin_pixmap_Car.x() + (endPoint.x() - lastPoint.x()));
+        point_origin_pixmap_Car.setY(point_origin_pixmap_Car.y() + (endPoint.y() - lastPoint.y()));
+        update(); //draw the screen
+        lastPoint = endPoint;
+    }
     }
 }
 
 void MainWindow::mouseReleaseEvent(QMouseEvent *event)
 {
-    if(event->button() == Qt::LeftButton) //release the left button of mouse
+    if (event->button() == Qt::LeftButton) //release the left button of mouse
     {
-        if(flag_translate_pixmap_Car)
-        {
-            endPoint = event->pos();
-            point_origin_pixmap_Car.setX(point_origin_pixmap_Car.x()+(endPoint.x()-lastPoint.x()));
-            point_origin_pixmap_Car.setY(point_origin_pixmap_Car.y()+(endPoint.y()-lastPoint.y()));
-            //cout<<"location: "<<lastPixLocalePoint.x()<<" "<<lastPixLocalePoint.y()<<endl;
-            update(); ////draw the screen
-            lastPoint = endPoint;
-        }
+    if (flag_translate_pixmap_Car)
+    {
+        endPoint = event->pos();
+        point_origin_pixmap_Car.setX(point_origin_pixmap_Car.x() + (endPoint.x() - lastPoint.x()));
+        point_origin_pixmap_Car.setY(point_origin_pixmap_Car.y() + (endPoint.y() - lastPoint.y()));
+        //cout<<"location: "<<lastPixLocalePoint.x()<<" "<<lastPixLocalePoint.y()<<endl;
+        update(); ////draw the screen
+        lastPoint = endPoint;
+    }
     }
 }
 
@@ -413,30 +446,32 @@ void MainWindow::wheelEvent(QWheelEvent *event)
 {
     wheelPoint = event->pos();
     //if(wheelPoint.x()<=(1570+pixmapLocation.x())&&wheelPoint.x()>=pixmapLocation.x()&&wheelPoint.y()<=(900+pixmapLocation.y())&&wheelPoint.y()>=pixmapLocation.y())
-    if(flag_isIn_pixmap_Car)
+    if (flag_isIn_pixmap_Car)
     {
-        //cout<<wheelPoint.x()<<" "<<wheelPoint.y()<<endl;
-        qreal scaleLast = scale_pixmap_Car;
-        if(event->delta()>0)
-        {
-            scale_pixmap_Car *=1.2;
-        }
-        else{
-            if(scale_pixmap_Car>0.5)
-                scale_pixmap_Car /=1.2;
-        }
-        point_origin_pixmap_Car.setX((scaleLast-scale_pixmap_Car)*(wheelPoint.x()-point_location_pixmap_Car.x())/scaleLast+(scale_pixmap_Car*point_origin_pixmap_Car.x()/scaleLast));
-        point_origin_pixmap_Car.setY((scaleLast-scale_pixmap_Car)*(wheelPoint.y()-point_location_pixmap_Car.y())/scaleLast+(scale_pixmap_Car*point_origin_pixmap_Car.y()/scaleLast));
-        update();
+    //cout<<wheelPoint.x()<<" "<<wheelPoint.y()<<endl;
+    qreal scaleLast = scale_pixmap_Car;
+    if (event->delta() > 0)
+    {
+        scale_pixmap_Car *= 1.2;
+    }
+    else
+    {
+        if (scale_pixmap_Car > 0.5)
+        scale_pixmap_Car /= 1.2;
+    }
+    point_origin_pixmap_Car.setX((scaleLast - scale_pixmap_Car) * (wheelPoint.x() - point_location_pixmap_Car.x()) / scaleLast + (scale_pixmap_Car * point_origin_pixmap_Car.x() / scaleLast));
+    point_origin_pixmap_Car.setY((scaleLast - scale_pixmap_Car) * (wheelPoint.y() - point_location_pixmap_Car.y()) / scaleLast + (scale_pixmap_Car * point_origin_pixmap_Car.y() / scaleLast));
+    update();
     }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     //std::cout<<"forced to stop"<<std::endl;
-    getLicensePlateThread.Stop();
-    getFramesThread.Stop();
+    getLicensePlateThread->Stop();
+    getFramesThread->Stop();
     radarFrameProcessThread.Stop();
+    m_pImgCtrl->Stop();
 }
 
 void MainWindow::on_pushButton_road_left_clicked()
@@ -518,15 +553,17 @@ void MainWindow::on_Btn_submit_clicked()
 
 void MainWindow::ReceiveSentConfigMsg(bool flag)
 {
-    if(flag)
+    if (flag)
     {
-        QMessageBox::information(this, tr("设置信息发送状态"),
-                                 tr("设置信息发送成功"),
-                                 QMessageBox::Ok);
-    }else{
-        QMessageBox::critical(this, tr("设置信息发送状态"),
-                              tr("设置信息发送失败"),
-                              QMessageBox::Ok);
+    QMessageBox::information(this, tr("设置信息发送状态"),
+                 tr("设置信息发送成功"),
+                 QMessageBox::Ok);
+    }
+    else
+    {
+    QMessageBox::critical(this, tr("设置信息发送状态"),
+                  tr("设置信息发送失败"),
+                  QMessageBox::Ok);
     }
 }
 

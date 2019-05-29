@@ -8,44 +8,56 @@ ReceiveDataFromServer::ReceiveDataFromServer()
     in.setDevice(client);
     in.setVersion(QDataStream::Qt_5_10);
     connect(client, &QIODevice::readyRead, this, &ReceiveDataFromServer::readData);
-    connect(client, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),this, &ReceiveDataFromServer::displayError);
+    connect(client, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &ReceiveDataFromServer::displayError);
     readHeadOrBody = "head";
 }
 
 
 
-void ReceiveDataFromServer::CarLicenseHandler (const char * buffer)
+void ReceiveDataFromServer::CarLicenseHandler(const char *buffer)
 {
-    const CarLicense * carLicnese = reinterpret_cast<const CarLicense *>(buffer);
-    std::cout<<"license: "<<carLicnese->license<<std::endl;
+    const CarLicense *carLicense = reinterpret_cast<const CarLicense *>(buffer);
+    //std::cout<<"license: "<<carLicense->license<<std::endl;
     // todo
+    mutexCarLicense.lock();
+    queueCarLicense.enqueue(*carLicense);
+    mutexCarLicense.unlock();
 }
 
-void ReceiveDataFromServer::Frame60BsHandler (const char * buffer)
+void ReceiveDataFromServer::Frame60BsHandler(const char *buffer)
 {
-    const Frame60Bs * frame60Bs = reinterpret_cast<const Frame60Bs *>(buffer);
-    std::cout<<"frame: "<<frame60Bs->length<<std::endl;
+    const Frame60Bs *frame60Bs = reinterpret_cast<const Frame60Bs *>(buffer);
+    //std::cout<<"frame: "<<frame60Bs->length<<std::endl;
     // todo
+    mutexFrame60Bs.lock();
+    queueFrame60Bs.enqueue(*frame60Bs);
+    mutexFrame60Bs.unlock();
 }
 
 void ReceiveDataFromServer::readData()
 {
-    if ("head" == readHeadOrBody) {
-        if (client->bytesAvailable() < sizeof(MagicHeader)) {
-            return;
-        }
-        in.readRawData(reinterpret_cast<char *>(&magicHeader),sizeof(MagicHeader));
-        std::cout<<"head number: "<<magicHeader.number<<std::endl;
-        readHeadOrBody = "body";
-    }
-    if (client->bytesAvailable() < magicHeader.packetLength) {
+    if ("head" == readHeadOrBody)
+    {
+    if (client->bytesAvailable() < sizeof(MagicHeader))
+    {
         return;
     }
+    in.readRawData(reinterpret_cast<char *>(&magicHeader), sizeof(MagicHeader));
+    //std::cout<<"head number: "<<magicHeader.number<<std::endl;
+    readHeadOrBody = "body";
+    }
+    if (client->bytesAvailable() < magicHeader.packetLength)
+    {
+    return;
+    }
 
+    if (magicHeader.packetLength > 0)
+    {
     char buffer[magicHeader.packetLength];
     in.readRawData(buffer, magicHeader.packetLength);
 
-    switch(magicHeader.number) {
+    switch (magicHeader.number)
+    {
     case 0x20:
         CarLicenseHandler(buffer);
         break;
@@ -57,15 +69,15 @@ void ReceiveDataFromServer::readData()
         break;
 
     }
-
-
     readHeadOrBody = "head";
+    }
+
     readData();
 }
 
 void ReceiveDataFromServer::run()
 {
-    std::cout<<"thread run"<<std::endl;
+    std::cout << "thread run" << std::endl;
     MagicHeader head;
     head.number = 0x40;
     head.packetLength = sizeof(LiveView);
@@ -77,25 +89,83 @@ void ReceiveDataFromServer::run()
 
 void ReceiveDataFromServer::StartReceiveData()
 {
-    client->connectToHost(QHostAddress("192.168.1.101"), 1995);
+    client->connectToHost(QHostAddress("192.168.233.1"), 1995);
     this->start();
 }
 
 void ReceiveDataFromServer::displayError(QAbstractSocket::SocketError socketError)
 {
-    switch (socketError) {
+    switch (socketError)
+    {
     case QAbstractSocket::RemoteHostClosedError:
-        break;
+    break;
     case QAbstractSocket::HostNotFoundError:
-        std::cout<<"The host was not found. Please check the host name and port settings."<<std::endl;
-        break;
+    std::cout << "The host was not found. Please check the host name and port settings." << std::endl;
+    break;
     case QAbstractSocket::ConnectionRefusedError:
-        std::cout<<"The connection was refused by the peer. "
-                   "Make sure the fortune server is running, "
-                   "and check that the host name and port "
-                   "settings are correct."<<std::endl;
-        break;
+    std::cout << "The connection was refused by the peer. "
+          "Make sure the fortune server is running, "
+          "and check that the host name and port "
+          "settings are correct." << std::endl;
+    break;
     default:
-        std::cout<<"The following error occurred: %1."<<std::endl;
+    std::cout << "The following error occurred: %1." << std::endl;
     }
+}
+
+ReceiveDataFromServer::Frame60Bs ReceiveDataFromServer::GetQueueFrame60Bs()
+{
+    Frame60Bs frame60Bs;
+    frame60Bs.length = 0;
+    mutexFrame60Bs.lock();
+    if (!queueFrame60Bs.isEmpty())
+    {
+    frame60Bs = queueFrame60Bs.dequeue();
+    }
+    mutexFrame60Bs.unlock();
+    return frame60Bs;
+}
+
+bool ReceiveDataFromServer::HasFrame60Bs()
+{
+    bool hasdata;
+    mutexFrame60Bs.lock();
+    if (!queueFrame60Bs.isEmpty())
+    {
+    hasdata = true;
+    }
+    else
+    {
+    hasdata = false;
+    }
+    mutexFrame60Bs.unlock();
+    return hasdata;
+}
+
+ReceiveDataFromServer::CarLicense ReceiveDataFromServer::GetQueueCarLicense()
+{
+    CarLicense carLicense;
+    mutexCarLicense.lock();
+    if (!queueCarLicense.isEmpty())
+    {
+    carLicense = queueCarLicense.dequeue();
+    }
+    mutexCarLicense.unlock();
+    return carLicense;
+}
+
+bool ReceiveDataFromServer::HasCarLicense()
+{
+    bool hasdata;
+    mutexCarLicense.lock();
+    if (!queueCarLicense.isEmpty())
+    {
+    hasdata = true;
+    }
+    else
+    {
+    hasdata = false;
+    }
+    mutexCarLicense.unlock();
+    return hasdata;
 }

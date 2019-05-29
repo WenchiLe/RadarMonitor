@@ -1,21 +1,23 @@
 #include "getlicenseplatethread.h"
 
-GetLicensePlateThread::GetLicensePlateThread()
+GetLicensePlateThread::GetLicensePlateThread(ReceiveDataFromServer *receiveDataFromServer)
 {
-    qRegisterMetaType<ReceiveLicensePlate::carLicense>("ReceiveLicensePlate::carLicense");
-    receiveLicensePlate.StartReceiveData();
+    qRegisterMetaType<ReceiveDataFromServer::CarLicense>("ReceiveDataFromServer::CarLicense");
+    //qRegisterMetaType<ReceiveLicensePlate::carLicense>("ReceiveLicensePlate::carLicense");
+    //receiveLicensePlate.StartReceiveData();
     flag = true;
+    this->receiveDataFromServer = receiveDataFromServer;
 }
 
 void GetLicensePlateThread::run()
 {
     while(flag)
     {
-        if (receiveLicensePlate.HasData())
+        if (receiveDataFromServer->HasCarLicense())
         {
-            ReceiveLicensePlate::carLicense frame60Bs;
-            frame60Bs = receiveLicensePlate.GetQueue();
-            emit LicensePlateChanged(frame60Bs);
+            ReceiveDataFromServer::CarLicense carLicense;
+            carLicense = receiveDataFromServer->GetQueueCarLicense();
+            emit LicensePlateChanged(carLicense);
         }
         //msleep(1000);
     }
@@ -23,7 +25,6 @@ void GetLicensePlateThread::run()
 
 void GetLicensePlateThread::Stop()
 {
-    receiveLicensePlate.StopReceiveData();
     flag = false;
     if(!this->wait(5000))
     {

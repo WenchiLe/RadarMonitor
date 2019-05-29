@@ -8,7 +8,7 @@
 #include <QQueue>
 #include <QMap>
 #include <QVector>
-#include <receivedata.h>
+#include <receivedatafromserver.h>
 #include <QReadWriteLock>
 #include <QList>
 
@@ -55,7 +55,7 @@ private:
 public:
     RadarUnitData();
     void SetRadarLocation(QPoint point_radar_location);
-    void PushNewFrame(ReceiveData::Frame60Bs frame60Bs);
+    void PushNewFrame(ReceiveDataFromServer::Frame60Bs frame60Bs);
     Frame FetchFrame();
     Frame GetViewOfFrame(int i);
     void SetRadarID(int radar_ID);

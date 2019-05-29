@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
+QT       += network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -39,7 +40,8 @@ SOURCES += \
     receivedatafromserver.cpp \
     RangeSlider.cpp \
     slider.cpp \
-    sendconfig.cpp
+    sendconfig.cpp \
+    filedownloader.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -55,7 +57,8 @@ HEADERS += \
     receivedatafromserver.h \
     RangeSlider.h \
     slider.h \
-    sendconfig.h
+    sendconfig.h \
+    filedownloader.h
 
 FORMS += \
         mainwindow.ui

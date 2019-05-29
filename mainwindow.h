@@ -1,11 +1,13 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+#define ROADNUM 2
 
 #include <QMainWindow>
 #include <QPainter>
 #include <getframesthread.h>
 #include <radarframeprocessthread.h>
 #include <getlicenseplatethread.h>
+#include <receivedatafromserver.h>
 #include <QtMath>
 #include <QMap>
 #include <QMouseEvent>
@@ -16,12 +18,15 @@
 #include <QMessageBox>
 #include <QDebug>
 #include "RangeSlider.h"
-#include "Slider.h"
+#include "slider.h"
 #include "sendconfig.h"
 
-#define ROADNUM 2
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include "filedownloader.h"
 
-namespace Ui {
+namespace Ui
+{
 class MainWindow;
 }
 
@@ -36,10 +41,12 @@ public:
 private:
     Ui::MainWindow *ui;
 
-    GetFramesThread getFramesThread;
-    GetLicensePlateThread getLicensePlateThread;
+    GetFramesThread *getFramesThread;
+    GetLicensePlateThread *getLicensePlateThread;
     RadarFrameProcessThread radarFrameProcessThread;
-    ReceiveData::Frame60Bs lastFrame60Bs;
+    ReceiveDataFromServer::Frame60Bs lastFrame60Bs;
+
+    ReceiveDataFromServer receiveDataFromServer;
 
     QPoint point_location_pixmap_Car;
     QPoint point_location_pixmap_Map;
@@ -71,7 +78,10 @@ private:
     int roadOffSet[ROADNUM] = {0};
     int roadZoom[ROADNUM] = {0};
 
-    QMap<int,bool> map_can_showDetail;
+    QMap<int, bool> map_can_showDetail;
+
+    FileDownloader *m_pImgCtrl;
+    QPixmap videoImage;
 
     qreal carAngle = 0;
 
@@ -94,7 +104,7 @@ protected:
     void closeEvent(QCloseEvent *event);
 
 private slots:
-    void NewFramesCome(ReceiveData::Frame60Bs frame60Bs);
+    void NewFramesCome(ReceiveDataFromServer::Frame60Bs frame60Bs);
     void on_pushButton_road_left_clicked();
     void on_pushButton_road_right_clicked();
     void on_pushButton_road_enlarge_clicked();
@@ -102,6 +112,7 @@ private slots:
     void on_Btn_submit_clicked();
     void ReceiveSentConfigMsg(bool flag);
     void timerUpdate();
+    void loadImage();
 
 signals:
     void SetConfig(QVector<SendConfig::ScaleSetInfo> ScaleSetInfoS);

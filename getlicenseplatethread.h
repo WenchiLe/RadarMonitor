@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QThread>
 #include <receivelicenseplate.h>
+#include <receivedatafromserver.h>
 #include <QVector>
 #include <QList>
 
@@ -12,18 +13,19 @@ class GetLicensePlateThread : public QThread
     Q_OBJECT
 
 public:
-    GetLicensePlateThread();
+    GetLicensePlateThread(ReceiveDataFromServer *receiveDataFromServer);
     void Stop();
 
 signals:
-void LicensePlateChanged(ReceiveLicensePlate::carLicense carLicense);//signal to draw the last frame
+void LicensePlateChanged(ReceiveDataFromServer::CarLicense carLicense);
 
 protected:
     void run();
 
 private:
-    ReceiveLicensePlate receiveLicensePlate;
+    //ReceiveLicensePlate receiveLicensePlate;
     bool flag;
+    ReceiveDataFromServer *receiveDataFromServer;
 };
 
 #endif // GETLICENSEPLATETHREAD_H

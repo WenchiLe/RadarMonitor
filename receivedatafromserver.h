@@ -21,34 +21,39 @@ class ReceiveDataFromServer : public QThread
 {
     Q_OBJECT
 public:
-    typedef PACK(struct {
-                     int32_t number;
-                     int32_t packetLength;
-                 }) MagicHeader;
+    typedef PACK(struct
+    {
+    int32_t number;
+    int32_t packetLength;
+    }) MagicHeader;
 
-    typedef PACK(struct {
-                     int32_t clientId;
-                 }) LiveView;
+    typedef PACK(struct
+    {
+    int32_t clientId;
+    }) LiveView;
 
-    typedef PACK(struct {
-                     int32_t nodeId;
-                     double speed;
-                     double longitude;
-                     double latitude;
-                     int64_t timeStamp;
-                     char license[20];
-                 }) CarLicense;
+    typedef PACK(struct
+    {
+    int32_t nodeId;
+    double speed;
+    double longitude;
+    double latitude;
+    int64_t timeStamp;
+    char license[20];
+    }) CarLicense;
 
-    typedef PACK(struct {
-                     int32_t radarId;
-                     int32_t length;
-                     int64_t timeStamp;
-                     float frameData[256][6];
-                 }) Frame60Bs;
+    typedef PACK(struct
+    {
+    int32_t radarId;
+    int32_t length;
+    int64_t timeStamp;
+    float frameData[256][6];
+    }) Frame60Bs;
 
     int ListenFlag = 0;
 
-    QMutex mutex;
+    QMutex mutexFrame60Bs;
+    QMutex mutexCarLicense;
     QQueue<Frame60Bs> queueFrame60Bs;
     QQueue<CarLicense> queueCarLicense;
 
@@ -61,8 +66,12 @@ public:
     ReceiveDataFromServer();
     void StartReceiveData();
     void StopReceiveData();
-    void CarLicenseHandler (const char * buffer);
-    void Frame60BsHandler (const char * buffer);
+    void CarLicenseHandler(const char *buffer);
+    void Frame60BsHandler(const char *buffer);
+    Frame60Bs GetQueueFrame60Bs();
+    bool HasFrame60Bs();
+    CarLicense GetQueueCarLicense();
+    bool HasCarLicense();
 
 protected:
     void run();

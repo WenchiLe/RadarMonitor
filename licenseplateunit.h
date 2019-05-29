@@ -3,7 +3,7 @@
 
 #include <QtCore>
 #include <QMutex>
-#include <receivelicenseplate.h>
+#include <receivedatafromserver.h>
 #include <QQueue>
 
 class LicensePlateUnit
@@ -21,7 +21,7 @@ public:
 
 public:
     LicensePlateUnit();
-    void PushNewFrame(ReceiveLicensePlate::carLicense carLicense);
+    void PushNewFrame(ReceiveDataFromServer::CarLicense carLicense);
     carLicense FetchFrame();
     bool HasFrame();
 };
