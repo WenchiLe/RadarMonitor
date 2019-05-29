@@ -281,7 +281,7 @@ void MainWindow::NewFramesCome(ReceiveDataFromServer::Frame60Bs frame60Bs)
 
 void MainWindow::loadImage()
 {
-    std::cout << "loadImage" << std::endl;
+    //std::cout << "loadImage" << std::endl;
     videoImage.loadFromData(m_pImgCtrl->downloadedData());
     update();
 }
@@ -390,4 +390,5 @@ void MainWindow::closeEvent(QCloseEvent *event)
     getLicensePlateThread->Stop();
     getFramesThread->Stop();
     radarFrameProcessThread.Stop();
+    m_pImgCtrl->Stop();
 }

@@ -16,6 +16,7 @@ public:
     explicit FileDownloader(QUrl imageUrl);
     virtual ~FileDownloader();
     QByteArray downloadedData() const;
+    void Stop();
 
 protected:
     void run();
@@ -31,6 +32,7 @@ private:
     QNetworkAccessManager *m_WebCtrl;
     //QNetworkRequest *request;
     QByteArray m_DownloadedData;
+    bool flag;
 };
 
 #endif // FILEDOWNLOADER_H
