@@ -2,8 +2,8 @@
 #define RADARRADARCOMPARETHREAD_H
 
 #define LAST_RADAR_OVERLAP_ZONE 200
-#define THIS_RADAR_OVERLAP_ZONE 50
-#define THRESHOLD 20
+#define THIS_RADAR_OVERLAP_ZONE 120
+#define THRESHOLD 50
 #define FACTOR 3
 
 #include <QObject>
@@ -17,7 +17,7 @@ class RadarRadarCompareThread : public QThread
     Q_OBJECT
 
 public:
-    RadarRadarCompareThread(RadarUnitData *A,RadarUnitData *B);
+    RadarRadarCompareThread(RadarUnitData *A, RadarUnitData *B);
     void Stop();
 
 private:

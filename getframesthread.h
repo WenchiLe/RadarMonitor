@@ -1,6 +1,8 @@
 #ifndef GETFRAMESTHREAD_H
 #define GETFRAMESTHREAD_H
 
+#define RADAR_NUM 3
+
 #include <QObject>
 #include <QThread>
 #include <receivedata.h>
@@ -10,16 +12,17 @@
 
 class GetFramesThread : public QThread
 {
-     Q_OBJECT
+    Q_OBJECT
 
 public:
     GetFramesThread(ReceiveDataFromServer *receiveDataFromServer);
     void SetRadarID(int radar_ID);
     void Stop();
+    void SetRadarAngle(qreal angle);
 
 signals:
-void FramesChanged(ReceiveDataFromServer::Frame60Bs frame60Bs);//signal to draw the last frame
-void ToStoreFrames(ReceiveDataFromServer::Frame60Bs frame60Bs);//signal to store the last frame
+    void FramesChanged(ReceiveDataFromServer::Frame60Bs frame60Bs);//signal to draw the last frame
+    void ToStoreFrames(ReceiveDataFromServer::Frame60Bs frame60Bs);//signal to store the last frame
 
 protected:
     void run();
@@ -29,6 +32,7 @@ private:
     int radar_ID;
     bool flag;
     ReceiveDataFromServer *receiveDataFromServer;
+    qreal radarAngle[RADAR_NUM] = {0};
 };
 
 #endif // GETFRAMESTHREAD_H

@@ -89,6 +89,7 @@ private:
     RangeSlider *rangeSlider_lat_dis;
     RangeSlider *rangeSlider_oncom_v;
     RangeSlider *rangeSlider_depart_v;
+
     Slider *Slider_angle;
 
     SendConfig sendConfig;
