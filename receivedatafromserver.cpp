@@ -89,8 +89,11 @@ void ReceiveDataFromServer::run()
 
 void ReceiveDataFromServer::StartReceiveData()
 {
-    client->connectToHost(QHostAddress("192.168.233.1"), 1995);
-    this->start();
+    //client->connectToHost(QHostAddress("192.168.233.1"), 1995);
+    //client->connectToHost(QHostAddress("118.25.49.212"), 1995);
+    QHostInfo::lookupHost(DEFAULT_SERVER,
+              this, SLOT(lookedUp(QHostInfo)));
+    //this->start();
 }
 
 void ReceiveDataFromServer::displayError(QAbstractSocket::SocketError socketError)
@@ -168,4 +171,40 @@ bool ReceiveDataFromServer::HasCarLicense()
     }
     mutexCarLicense.unlock();
     return hasdata;
+}
+
+void ReceiveDataFromServer::lookedUp(const QHostInfo &host)
+{
+    if (host.error() != QHostInfo::NoError)
+    {
+    qDebug() << "Lookup failed:" << host.errorString();
+    return;
+    }
+
+    foreach (const QHostAddress &address, host.addresses())
+    {
+    // 输出IPV4、IPv6地址
+    if (address.protocol() == QAbstractSocket::IPv4Protocol)
+    {
+        qDebug() << "Found IPv4 address:" << address.toString();
+        client->connectToHost(QHostAddress(address.toString()), DEFAULT_PORT);
+        this->start();
+        break;
+    }
+    else if (address.protocol() == QAbstractSocket::IPv6Protocol)
+    {
+        qDebug() << "Found IPv6 address:" << address.toString();
+        client->connectToHost(QHostAddress(address.toString()), DEFAULT_PORT);
+        this->start();
+        break;
+    }
+    else
+    {
+        qDebug() << "Found other address:" << address.toString();
+        client->connectToHost(QHostAddress(address.toString()), DEFAULT_PORT);
+        this->start();
+        break;
+    }
+
+    }
 }

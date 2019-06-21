@@ -345,13 +345,16 @@ void MainWindow::paintEvent(QPaintEvent *)
     QString license = radarFrameProcessThread.GetLicense(radarID, objID);
     if (map_can_showDetail.value(objID, false))
     {
+        //carPainter.setPen(pen);
+        carPainter.setFont(QFont("times", 10));
         //            int x = (int)(350 - (lastFrame60Bs.frame[j][2]*6));
         //            int y = (int)(840 - lastFrame60Bs.frame[j][1]*3);
         float velocity = qSqrt(qPow(lastFrame60Bs.frameData[j][3], 2) + qPow(lastFrame60Bs.frameData[j][4], 2)) * 3.6;
         float dis_long = lastFrame60Bs.frameData[j][1];
         float dis_lat = lastFrame60Bs.frameData[j][2];
         carPainter.drawRect(x + 6, y - 12, 90, 50);
-        carPainter.drawText(x + 11, y, license.replace("AKB*", "沪A·"));
+        //carPainter.drawText(x + 11, y, license.replace("AKB*", "沪A·"));
+        carPainter.drawText(x + 11, y, QString::number(objID));
         carPainter.drawText(x + 11, y + 11, QString::number(velocity, 'f', 0) + "km/h");
         carPainter.drawText(x + 11, y + 22, "纵向坐标:" + QString::number(dis_long, 'f', 0) + "m");
         carPainter.drawText(x + 11, y + 34, "横向坐标:" + QString::number(dis_lat, 'f', 0) + "m");

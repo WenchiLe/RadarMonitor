@@ -9,7 +9,8 @@
 #error Unsupported platform
 #endif
 
-#define DEFAULT_PORT 2046
+#define DEFAULT_PORT 1995
+#define DEFAULT_SERVER "sh0.march1993.com"
 
 #include <QObject>
 #include <QThread>
@@ -79,6 +80,7 @@ protected:
 private slots:
     void readData();
     void displayError(QAbstractSocket::SocketError socketError);
+    void lookedUp(const QHostInfo &host);
 };
 
 #endif // RECEIVEDATAFROMSERVER_H
