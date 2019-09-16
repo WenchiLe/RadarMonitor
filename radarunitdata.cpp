@@ -21,11 +21,11 @@ void RadarUnitData::PushNewFrame(FrameStructData frame60Bs)
     for (int i = 0; i < frame60Bs.length; i++)
     {
     RadarUnitData::CarInfo carInfo;
-    carInfo.objID = frame60Bs.frameData->objId;
-    carInfo.longtitude = frame60Bs.frameData->currInfo.distLong;
-    carInfo.latitude = frame60Bs.frameData->currInfo.distLat;
-    carInfo.longVelocity = frame60Bs.frameData->currInfo.velLong;
-    carInfo.latVelocity = frame60Bs.frameData->currInfo.velLat;
+    carInfo.objID = frame60Bs.frameData[i].objId;
+    carInfo.longtitude = frame60Bs.frameData[i].currInfo.distLong;
+    carInfo.latitude = frame60Bs.frameData[i].currInfo.distLat;
+    carInfo.longVelocity = frame60Bs.frameData[i].currInfo.velLong;
+    carInfo.latVelocity = frame60Bs.frameData[i].currInfo.velLat;
     frame.cars.push_back(carInfo);
     }
     mutex.lock();

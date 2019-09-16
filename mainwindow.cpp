@@ -155,9 +155,9 @@ void MainWindow::paintEvent(QPaintEvent *)
     carPainter.setBrush(brush);
     for (int j = 0; j < lastFrame60Bs.length; j++)
     {
-    int x = (int)(350 - (lastFrame60Bs.frameData->currInfo.distLat * 6));
-    int y = (int)(840 - lastFrame60Bs.frameData->currInfo.distLong * 3);
-    int objID = lastFrame60Bs.frameData->objId;
+    int x = (int)(350 - (lastFrame60Bs.frameData[j].currInfo.distLat * 6));
+    int y = (int)(840 - lastFrame60Bs.frameData[j].currInfo.distLong * 3);
+    int objID = lastFrame60Bs.frameData[j].objId;
 
     //QPoint pointDis = cursorPointInPix - QPoint(x,y);
     double pointDis = sqrt(pow(cursorPointInPixCar.x() - x, 2) + pow(cursorPointInPixCar.y() - y, 2));
@@ -187,8 +187,8 @@ void MainWindow::paintEvent(QPaintEvent *)
     //                carPainter.setPen(pen); //
     QPixmap pix("images/car.png");
     QMatrix matrix;
-    float vy = lastFrame60Bs.frameData->currInfo.velLong;
-    float vx = -lastFrame60Bs.frameData->currInfo.velLat;
+    float vy = lastFrame60Bs.frameData[j].currInfo.velLong;
+    float vx = -lastFrame60Bs.frameData[j].currInfo.velLat;
     if (qAbs(vx) == 0)
     {
         if (vy >= 0)
@@ -224,15 +224,15 @@ void MainWindow::paintEvent(QPaintEvent *)
     //draw detail
     for (int j = 0; j < lastFrame60Bs.length; j++)
     {
-    int objID = lastFrame60Bs.frameData->objId;
+    int objID = lastFrame60Bs.frameData[j].objId;
     if (map_can_showDetail.value(objID, false))
     {
-        int x = (int)(350 - (lastFrame60Bs.frameData->currInfo.distLat * 6));
-        int y = (int)(840 - lastFrame60Bs.frameData->currInfo.distLong * 3);
-        float velocity = qSqrt(qPow(lastFrame60Bs.frameData->currInfo.velLong, 2) + qPow(lastFrame60Bs.frameData->currInfo.velLat, 2)) * 3.6;
+        int x = (int)(350 - (lastFrame60Bs.frameData[j].currInfo.distLat * 6));
+        int y = (int)(840 - lastFrame60Bs.frameData[j].currInfo.distLong * 3);
+        float velocity = qSqrt(qPow(lastFrame60Bs.frameData[j].currInfo.velLong, 2) + qPow(lastFrame60Bs.frameData[j].currInfo.velLat, 2)) * 3.6;
         QString license = radarFrameProcessThread.GetLicense(radarID, objID);
-        float dis_long = lastFrame60Bs.frameData->currInfo.distLong;
-        float dis_lat = lastFrame60Bs.frameData->currInfo.distLat;
+        float dis_long = lastFrame60Bs.frameData[j].currInfo.distLong;
+        float dis_lat = lastFrame60Bs.frameData[j].currInfo.distLat;
         carPainter.drawRect(x + 6, y - 12, 90, 50);
         carPainter.drawText(x + 11, y, license.replace("AKB*", "沪A·"));
         carPainter.drawText(x + 11, y + 11, QString::number(velocity, 'f', 0) + "km/h");

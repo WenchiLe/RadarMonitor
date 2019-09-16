@@ -95,9 +95,9 @@ void ReceiveData::run()
         //std::cout << "data.length:" << frame60Bs.length << std::endl;
 //        for (int j = 0; j < frame60Bs.length; j++)
 //        {
-//            std::cout << "ObjID:" << frame60Bs.frameData->objId << std::endl;
-//            std::cout << "ObjDistLong:" << frame60Bs.frameData->currInfo.distLong << std::endl;
-//            std::cout << "ObjDistLat:" << frame60Bs.frameData->currInfo.distLat << std::endl;
+//            std::cout << "ObjID:" << frame60Bs.frameData[j].objId << std::endl;
+//            std::cout << "ObjDistLong:" << frame60Bs.frameData[j].currInfo.distLong << std::endl;
+//            std::cout << "ObjDistLat:" << frame60Bs.frameData[j].currInfo.distLat << std::endl;
 //            // << "ObjVelocityLong:" << frame60Bs.frame[j][3] << endl;
 //            //cout << "ObjvelocityLat:" << frame60Bs.frame[j][4] << endl;
 //        }
