@@ -21,8 +21,8 @@ public:
     void SetRadarAngle(qreal angle);
 
 signals:
-    void FramesChanged(ReceiveDataFromServer::Frame60Bs frame60Bs);//signal to draw the last frame
-    void ToStoreFrames(ReceiveDataFromServer::Frame60Bs frame60Bs);//signal to store the last frame
+    void FramesChanged(FrameStructData frame60Bs);//signal to draw the last frame
+    void ToStoreFrames(FrameStructData frame60Bs);//signal to store the last frame
 
 protected:
     void run();

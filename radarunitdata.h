@@ -18,32 +18,32 @@ public:
     int radar_ID;
     QPoint point_radar_location;
 
-    QMap<int,QString> map_license;
+    QMap<int, QString> map_license;
 
     struct UnitCompare
     {
-        int objID_this_radar;
-        int objID_last_radar;
-        float diff;
-        QString license;
+    int objID_this_radar;
+    int objID_last_radar;
+    float diff;
+    QString license;
     };
     QList<UnitCompare> CompareState;
 
     struct CarInfo
     {
-        int objID;
-        int state;
-        float longtitude;
-        float latitude;
-        float longVelocity;
-        float latVelocity;
+    int objID;
+    int state;
+    float longtitude;
+    float latitude;
+    float longVelocity;
+    float latVelocity;
     };
     struct Frame
     {
-        int64_t time;
-        int car_num;
-        QVector<CarInfo> cars;
-        bool used;
+    int64_t time;
+    int car_num;
+    QVector<CarInfo> cars;
+    bool used;
     };
     QVector<Frame> queue_frame;
 
@@ -55,12 +55,12 @@ private:
 public:
     RadarUnitData();
     void SetRadarLocation(QPoint point_radar_location);
-    void PushNewFrame(ReceiveDataFromServer::Frame60Bs frame60Bs);
+    void PushNewFrame(FrameStructData frame60Bs);
     Frame FetchFrame();
     Frame GetViewOfFrame(int i);
     void SetRadarID(int radar_ID);
     int GetFrameCount();
-    void UpdateMapLicense(int objID,QString license);
+    void UpdateMapLicense(int objID, QString license);
     QString GetLicense(int objID);
     Frame GetNextProcessFrame();
     Frame GetCompareFrame0();

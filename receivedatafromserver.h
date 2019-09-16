@@ -17,6 +17,7 @@
 #include <QQueue>
 #include <QMutex>
 #include <QtNetwork>
+#include "basestruct.h"
 
 class ReceiveDataFromServer : public QThread
 {
@@ -43,19 +44,19 @@ public:
     char license[20];
     }) CarLicense;
 
-    typedef PACK(struct
-    {
-    int32_t radarId;
-    int32_t length;
-    int64_t timeStamp;
-    float frameData[256][6];
-    }) Frame60Bs;
+//    typedef PACK(struct
+//    {
+//    int32_t radarId;
+//    int32_t length;
+//    int64_t timeStamp;
+//    float frameData[256][6];
+//    }) Frame60Bs;
 
     int ListenFlag = 0;
 
     QMutex mutexFrame60Bs;
     QMutex mutexCarLicense;
-    QQueue<Frame60Bs> queueFrame60Bs;
+    QQueue<FrameStructData> queueFrame60Bs;
     QQueue<CarLicense> queueCarLicense;
 
     QTcpSocket *client;
@@ -69,7 +70,7 @@ public:
     void StopReceiveData();
     void CarLicenseHandler(const char *buffer);
     void Frame60BsHandler(const char *buffer);
-    Frame60Bs GetQueueFrame60Bs();
+    FrameStructData GetQueueFrame60Bs();
     bool HasFrame60Bs();
     CarLicense GetQueueCarLicense();
     bool HasCarLicense();

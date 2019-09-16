@@ -30,11 +30,11 @@ public:
 private:
     QVector<RadarUnitData> vector_RadarUnitData;
     LicensePlateUnit licensePlateUnit;
-    QVector<RadarRadarCompareThread*> vector_RadarRadarCompareThread;
+    QVector<RadarRadarCompareThread *> vector_RadarRadarCompareThread;
     LicenseRadarCompareThread *licenseRadarCompareThread;
 
 private slots:
-    void StoreNewFrames(ReceiveDataFromServer::Frame60Bs frame60Bs);
+    void StoreNewFrames(FrameStructData frame60Bs);
     void StoreLicensePlate(ReceiveDataFromServer::CarLicense carLicense);
 };
 

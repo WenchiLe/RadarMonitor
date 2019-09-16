@@ -46,11 +46,11 @@ void RadarFrameProcessThread::Stop()
     }
 }
 
-void RadarFrameProcessThread::StoreNewFrames(ReceiveDataFromServer::Frame60Bs frame60Bs)
+void RadarFrameProcessThread::StoreNewFrames(FrameStructData frame60Bs)
 {
-    if (frame60Bs.radarId >= 1 && frame60Bs.radarId <= RADAR_NUMS)
+    if (frame60Bs.radarID >= 1 && frame60Bs.radarID <= RADAR_NUMS)
     {
-    vector_RadarUnitData[frame60Bs.radarId - 1].PushNewFrame(frame60Bs);
+    vector_RadarUnitData[frame60Bs.radarID - 1].PushNewFrame(frame60Bs);
     }
 }
 

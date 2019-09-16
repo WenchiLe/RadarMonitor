@@ -44,7 +44,7 @@ private:
     GetFramesThread *getFramesThread;
     GetLicensePlateThread *getLicensePlateThread;
     RadarFrameProcessThread radarFrameProcessThread;
-    ReceiveDataFromServer::Frame60Bs lastFrame60Bs;
+    FrameStructData lastFrame60Bs;
 
     ReceiveDataFromServer receiveDataFromServer;
 
@@ -105,7 +105,7 @@ protected:
     void closeEvent(QCloseEvent *event);
 
 private slots:
-    void NewFramesCome(ReceiveDataFromServer::Frame60Bs frame60Bs);
+    void NewFramesCome(FrameStructData frame60Bs);
     void on_pushButton_road_left_clicked();
     void on_pushButton_road_right_clicked();
     void on_pushButton_road_enlarge_clicked();

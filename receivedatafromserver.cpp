@@ -26,7 +26,7 @@ void ReceiveDataFromServer::CarLicenseHandler(const char *buffer)
 
 void ReceiveDataFromServer::Frame60BsHandler(const char *buffer)
 {
-    const Frame60Bs *frame60Bs = reinterpret_cast<const Frame60Bs *>(buffer);
+    const FrameStructData *frame60Bs = reinterpret_cast<const FrameStructData *>(buffer);
     //std::cout<<"frame: "<<frame60Bs->length<<std::endl;
     // todo
     mutexFrame60Bs.lock();
@@ -116,9 +116,9 @@ void ReceiveDataFromServer::displayError(QAbstractSocket::SocketError socketErro
     }
 }
 
-ReceiveDataFromServer::Frame60Bs ReceiveDataFromServer::GetQueueFrame60Bs()
+FrameStructData ReceiveDataFromServer::GetQueueFrame60Bs()
 {
-    Frame60Bs frame60Bs;
+    FrameStructData frame60Bs;
     frame60Bs.length = 0;
     mutexFrame60Bs.lock();
     if (!queueFrame60Bs.isEmpty())

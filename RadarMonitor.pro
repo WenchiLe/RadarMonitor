@@ -58,7 +58,8 @@ HEADERS += \
     RangeSlider.h \
     slider.h \
     sendconfig.h \
-    filedownloader.h
+    filedownloader.h \
+    basestruct.h
 
 FORMS += \
         mainwindow.ui

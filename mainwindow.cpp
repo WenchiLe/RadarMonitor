@@ -21,10 +21,10 @@ MainWindow::MainWindow(QWidget *parent) :
     QUrl imageUrl("http://192.168.1.106:8080/cam_1.jpg");
     m_pImgCtrl = new FileDownloader(imageUrl);
 
-    connect(getFramesThread, SIGNAL(FramesChanged(ReceiveDataFromServer::Frame60Bs)),
-        this, SLOT(NewFramesCome(ReceiveDataFromServer::Frame60Bs)));
-    connect(getFramesThread, SIGNAL(ToStoreFrames(ReceiveDataFromServer::Frame60Bs)),
-        &radarFrameProcessThread, SLOT(StoreNewFrames(ReceiveDataFromServer::Frame60Bs)));
+    connect(getFramesThread, SIGNAL(FramesChanged(FrameStructData)),
+        this, SLOT(NewFramesCome(FrameStructData)));
+    connect(getFramesThread, SIGNAL(ToStoreFrames(FrameStructData)),
+        &radarFrameProcessThread, SLOT(StoreNewFrames(FrameStructData)));
     connect(getLicensePlateThread, SIGNAL(LicensePlateChanged(ReceiveDataFromServer::CarLicense)),
         &radarFrameProcessThread, SLOT(StoreLicensePlate(ReceiveDataFromServer::CarLicense)));
     connect(m_pImgCtrl, SIGNAL(downloaded()), this, SLOT(loadImage()));
@@ -268,9 +268,9 @@ void MainWindow::paintEvent(QPaintEvent *)
     //        int x = (int)(350 - (lastFrame60Bs.frame[j][2]*6));
     //        int y = (int)(840 - lastFrame60Bs.frame[j][1]*3);
     //int x = (int)(-(lastFrame60Bs.frameData[j][2] * 6));
-    int x = (int)(-(lastFrame60Bs.frameData[j][2] * 3));
-    int y = (int)(-lastFrame60Bs.frameData[j][1] * 3);
-    int objID = lastFrame60Bs.frameData[j][0];
+    int x = (int)(-(lastFrame60Bs.frameData[j].currInfo.distLat * 3));
+    int y = (int)(-lastFrame60Bs.frameData[j].currInfo.distLong * 3);
+    int objID = lastFrame60Bs.frameData[j].objId;
 
     //QPoint pointDis = cursorPointInPix - QPoint(x,y);
     double pointDis = sqrt(pow(cursorPointInPixCar_trans.x() - x, 2) + pow(cursorPointInPixCar_trans.y() - y, 2));
@@ -293,8 +293,8 @@ void MainWindow::paintEvent(QPaintEvent *)
     //                carPainter.setPen(pen); //
     QPixmap pix("images/car.png");
     QMatrix matrix;
-    float vy = lastFrame60Bs.frameData[j][3];
-    float vx = -lastFrame60Bs.frameData[j][4];
+    float vy = lastFrame60Bs.frameData[j].currInfo.velLong;
+    float vx = -lastFrame60Bs.frameData[j].currInfo.velLat;
 //    if (qAbs(vx) == 0)
 //    {
 //        if (vy >= 0)
@@ -338,10 +338,10 @@ void MainWindow::paintEvent(QPaintEvent *)
     //draw detail
     for (int j = 0; j < lastFrame60Bs.length; j++)
     {
-    int objID = lastFrame60Bs.frameData[j][0];
+    int objID = lastFrame60Bs.frameData[j].objId;
     //int x = (int)(-(lastFrame60Bs.frameData[j][2] * 6));
-    int x = (int)(-(lastFrame60Bs.frameData[j][2] * 3));
-    int y = (int)(-lastFrame60Bs.frameData[j][1] * 3);
+    int x = (int)(-(lastFrame60Bs.frameData[j].currInfo.distLat * 3));
+    int y = (int)(-lastFrame60Bs.frameData[j].currInfo.distLong * 3);
     QString license = radarFrameProcessThread.GetLicense(radarID, objID);
     if (map_can_showDetail.value(objID, false))
     {
@@ -349,9 +349,9 @@ void MainWindow::paintEvent(QPaintEvent *)
         carPainter.setFont(QFont("times", 10));
         //            int x = (int)(350 - (lastFrame60Bs.frame[j][2]*6));
         //            int y = (int)(840 - lastFrame60Bs.frame[j][1]*3);
-        float velocity = qSqrt(qPow(lastFrame60Bs.frameData[j][3], 2) + qPow(lastFrame60Bs.frameData[j][4], 2)) * 3.6;
-        float dis_long = lastFrame60Bs.frameData[j][1];
-        float dis_lat = lastFrame60Bs.frameData[j][2];
+        float velocity = qSqrt(qPow(lastFrame60Bs.frameData[j].currInfo.velLong, 2) + qPow(lastFrame60Bs.frameData[j].currInfo.velLat, 2)) * 3.6;
+        float dis_long = lastFrame60Bs.frameData[j].currInfo.distLong;
+        float dis_lat = lastFrame60Bs.frameData[j].currInfo.distLat;
         carPainter.drawRect(x + 6, y - 12, 90, 50);
         //carPainter.drawText(x + 11, y, license.replace("AKB*", "沪A·"));
         carPainter.drawText(x + 11, y, QString::number(objID));
@@ -442,7 +442,7 @@ void MainWindow::paintEvent(QPaintEvent *)
     timer->start();
 }
 
-void MainWindow::NewFramesCome(ReceiveDataFromServer::Frame60Bs frame60Bs)
+void MainWindow::NewFramesCome(FrameStructData frame60Bs)
 {
     //std::cout<<frame60Bs.length<<std::endl;
     lastFrame60Bs = frame60Bs;

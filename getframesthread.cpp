@@ -3,7 +3,7 @@
 GetFramesThread::GetFramesThread(ReceiveDataFromServer *receiveDataFromServer)
 {
     //qRegisterMetaType<ReceiveData::Frame60Bs>("ReceiveData::Frame60Bs");
-    qRegisterMetaType<ReceiveDataFromServer::Frame60Bs>("ReceiveDataFromServer::Frame60Bs");
+    qRegisterMetaType<FrameStructData>("FrameStructData");
     radar_ID = 0;
     //receiveData.StartReceiveData();
     //receiveDataFromServer.StartReceiveData();
@@ -19,21 +19,21 @@ void GetFramesThread::run()
     {
     if (receiveDataFromServer->HasFrame60Bs())
     {
-        ReceiveDataFromServer::Frame60Bs frame60Bs;
+        FrameStructData frame60Bs;
         frame60Bs = receiveDataFromServer->GetQueueFrame60Bs();
         //todo : process the angle
-        qreal angle = qDegreesToRadians(radarAngle[frame60Bs.radarId - 1]);
+        qreal angle = qDegreesToRadians(radarAngle[frame60Bs.radarID - 1]);
         for (int j = 0; j < frame60Bs.length; j++)
         {
-        float x = frame60Bs.frameData[j][2];
-        float y = frame60Bs.frameData[j][1];
-        frame60Bs.frameData[j][2] = x * qCos(angle) - y * qSin(angle);
-        frame60Bs.frameData[j][1] = y * qCos(angle) + x * qSin(angle);
+        float x = frame60Bs.frameData[j].currInfo.distLat;
+        float y = frame60Bs.frameData[j].currInfo.distLong;
+        frame60Bs.frameData[j].currInfo.distLat = x * qCos(angle) - y * qSin(angle);
+        frame60Bs.frameData[j].currInfo.distLong = y * qCos(angle) + x * qSin(angle);
         }
 
         emit ToStoreFrames(frame60Bs);
         //std::cout<<frame60Bs.radar_ID<<std::endl;
-        if (frame60Bs.radarId - 1 == radar_ID)
+        if (frame60Bs.radarID - 1 == radar_ID)
         {
         emit FramesChanged(frame60Bs);
         }
