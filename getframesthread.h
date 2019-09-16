@@ -9,7 +9,7 @@
 
 class GetFramesThread : public QThread
 {
-     Q_OBJECT
+    Q_OBJECT
 
 public:
     GetFramesThread();
@@ -17,8 +17,8 @@ public:
     void Stop();
 
 signals:
-void FramesChanged(ReceiveData::Frame60Bs frame60Bs);//signal to draw the last frame
-void ToStoreFrames(ReceiveData::Frame60Bs frame60Bs);//signal to store the last frame
+    void FramesChanged(FrameStructData frame60Bs);//signal to draw the last frame
+    void ToStoreFrames(FrameStructData frame60Bs);//signal to store the last frame
 
 protected:
     void run();

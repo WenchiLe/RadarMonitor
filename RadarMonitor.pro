@@ -49,7 +49,8 @@ HEADERS += \
     licenseplateunit.h \
     radarradarcomparethread.h \
     licenseradarcomparethread.h \
-    receivedatafromserver.h
+    receivedatafromserver.h \
+    basestruct.h
 
 FORMS += \
         mainwindow.ui

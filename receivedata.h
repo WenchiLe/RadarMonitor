@@ -11,6 +11,7 @@
 #include <QThread>
 #include <QQueue>
 #include <QMutex>
+#include "basestruct.h"
 
 // Need to link with Ws2_32.lib
 #pragma comment (lib, "Ws2_32.lib")
@@ -21,13 +22,13 @@ class ReceiveData : public QThread
 {
     Q_OBJECT
 public:
-    struct Frame60Bs
-    {
-    int radar_ID;//the index of radar
-    int length;//the number of objects
-    int64_t time;//the time of frame;
-    float frame[256][6];//[0]:object_ID; [1]:dis_long; [2]:dis_lat; [3]:V_long; [4]:V_lat [5]:state;
-    };
+//    struct Frame60Bs
+//    {
+//    int radar_ID;//the index of radar
+//    int length;//the number of objects
+//    int64_t time;//the time of frame;
+//    FrameStructData frame[256];//[0]:object_ID; [1]:dis_long; [2]:dis_lat; [3]:V_long; [4]:V_lat [5]:state;
+//    };
 
     WSADATA wsaData;
     int iResult;
@@ -44,13 +45,13 @@ public:
     int ListenFlag = 0;
 
     QMutex mutex;
-    QQueue<Frame60Bs> queueFrame60Bs;
+    QQueue<FrameStructData> queueFrame60Bs;
 
 public:
     ReceiveData();
     void StartReceiveData();
     void StopReceiveData();
-    Frame60Bs GetQueue();
+    FrameStructData GetQueue();
     bool HasData();
 
 protected:

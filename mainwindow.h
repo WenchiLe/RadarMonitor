@@ -14,7 +14,8 @@
 
 #define ROADNUM 2
 
-namespace Ui {
+namespace Ui
+{
 class MainWindow;
 }
 
@@ -32,7 +33,7 @@ private:
     GetFramesThread getFramesThread;
     GetLicensePlateThread getLicensePlateThread;
     RadarFrameProcessThread radarFrameProcessThread;
-    ReceiveData::Frame60Bs lastFrame60Bs;
+    FrameStructData lastFrame60Bs;
 
     QPoint point_location_pixmap_Car;
     QPoint point_location_pixmap_Map;
@@ -64,7 +65,7 @@ private:
     int roadOffSet[ROADNUM] = {0};
     int roadZoom[ROADNUM] = {0};
 
-    QMap<int,bool> map_can_showDetail;
+    QMap<int, bool> map_can_showDetail;
 
     qreal carAngle = 0;
 
@@ -77,7 +78,7 @@ protected:
     void closeEvent(QCloseEvent *event);
 
 private slots:
-    void NewFramesCome(ReceiveData::Frame60Bs frame60Bs);
+    void NewFramesCome(FrameStructData frame60Bs);
     void on_pushButton_road_left_clicked();
     void on_pushButton_road_right_clicked();
     void on_pushButton_road_enlarge_clicked();

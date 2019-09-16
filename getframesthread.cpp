@@ -2,7 +2,7 @@
 
 GetFramesThread::GetFramesThread()
 {
-    qRegisterMetaType<ReceiveData::Frame60Bs>("ReceiveData::Frame60Bs");
+    qRegisterMetaType<FrameStructData>("FrameStructData");
     radar_ID = 0;
     receiveData.StartReceiveData();
     flag = true;
@@ -12,31 +12,32 @@ GetFramesThread::GetFramesThread()
 
 void GetFramesThread::run()
 {
-    while(flag)
+    while (flag)
     {
-        if (receiveData.HasData())
+    if (receiveData.HasData())
+    {
+        //std::cout << "hasdata" << std::endl;
+        FrameStructData frame60Bs;
+        frame60Bs = receiveData.GetQueue();
+        emit ToStoreFrames(frame60Bs);
+        //std::cout<<frame60Bs.radar_ID<<std::endl;
+        if (frame60Bs.radarID - 1 == radar_ID)
         {
-            ReceiveData::Frame60Bs frame60Bs;
-            frame60Bs = receiveData.GetQueue();
-            emit ToStoreFrames(frame60Bs);
-            //std::cout<<frame60Bs.radar_ID<<std::endl;
-            if(frame60Bs.radar_ID-1 == radar_ID)
-            {
-                emit FramesChanged(frame60Bs);
-            }
+        emit FramesChanged(frame60Bs);
         }
-        //msleep(1000);
+    }
+    //msleep(1000);
     }
 }
 
 void GetFramesThread::Stop()
 {
     flag = false;
-    if(!this->wait(5000))
+    if (!this->wait(5000))
     {
-        qWarning("GetFramesThread : Thread deadlock detected");
-        this->terminate();
-        this->wait();
+    qWarning("GetFramesThread : Thread deadlock detected");
+    this->terminate();
+    this->wait();
     }
     receiveData.StopReceiveData();
 }
