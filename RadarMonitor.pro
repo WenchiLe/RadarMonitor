@@ -52,7 +52,8 @@ HEADERS += \
     radarradarcomparethread.h \
     licenseradarcomparethread.h \
     receivedatafromserver.h \
-    filedownloader.h
+    filedownloader.h \
+    basestruct.h
 
 FORMS += \
         mainwindow.ui
