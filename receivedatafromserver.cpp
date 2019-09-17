@@ -77,7 +77,7 @@ void ReceiveDataFromServer::readData()
 
 void ReceiveDataFromServer::run()
 {
-    std::cout << "thread run" << std::endl;
+    std::cout << "thread run !" << std::endl;
     MagicHeader head;
     head.number = 0x40;
     head.packetLength = sizeof(LiveView);

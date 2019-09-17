@@ -25,8 +25,10 @@ void GetFramesThread::run()
         qreal angle = qDegreesToRadians(radarAngle[frame60Bs.radarID - 1]);
         for (int j = 0; j < frame60Bs.length; j++)
         {
-        float x = frame60Bs.frameData[j].currInfo.distLat;
-        float y = frame60Bs.frameData[j].currInfo.distLong;
+        float32_t x = frame60Bs.frameData[j].currInfo.distLat;
+        std::cout << "X:" << x << std::endl;
+        float32_t y = frame60Bs.frameData[j].currInfo.distLong;
+        std::cout << "Y:" << y << std::endl;
         frame60Bs.frameData[j].currInfo.distLat = x * qCos(angle) - y * qSin(angle);
         frame60Bs.frameData[j].currInfo.distLong = y * qCos(angle) + x * qSin(angle);
         }
