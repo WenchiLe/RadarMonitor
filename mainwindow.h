@@ -25,6 +25,8 @@
 #include <QNetworkReply>
 #include "filedownloader.h"
 
+#define FRAMESIZE 12816
+
 namespace Ui
 {
 class MainWindow;

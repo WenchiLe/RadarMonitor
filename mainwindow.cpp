@@ -5,6 +5,12 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    // check the frame size
+    if (sizeof(FrameStructData) != FRAMESIZE)
+    {
+    std::cout << "sizeof frame is not " << FRAMESIZE  << std::endl;
+    this->close();
+    }
     ui->setupUi(this);
 
     ui->centralWidget->setMouseTracking(true);

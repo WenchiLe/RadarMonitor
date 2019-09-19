@@ -25,10 +25,13 @@ void GetFramesThread::run()
         qreal angle = qDegreesToRadians(radarAngle[frame60Bs.radarID - 1]);
         for (int j = 0; j < frame60Bs.length; j++)
         {
-        float32_t x = frame60Bs.frameData[j].currInfo.distLat;
-        std::cout << "X:" << x << std::endl;
-        float32_t y = frame60Bs.frameData[j].currInfo.distLong;
-        std::cout << "Y:" << y << std::endl;
+        float x = frame60Bs.frameData[j].currInfo.distLat;
+        //std::cout << "X:" << x << std::endl;
+        float y = frame60Bs.frameData[j].currInfo.distLong;
+        //std::cout << "Y:" << y << std::endl;
+        //std::cout << "objId: " << frame60Bs.frameData[j].objId << std::endl;
+        //std::cout << "sizeof frame: " << sizeof(frame60Bs) << std::endl;
+        //std::cout << "car size: " << frame60Bs.frameData[j].objProperty.width << "   " << frame60Bs.frameData[j].objProperty.length << std::endl;
         frame60Bs.frameData[j].currInfo.distLat = x * qCos(angle) - y * qSin(angle);
         frame60Bs.frameData[j].currInfo.distLong = y * qCos(angle) + x * qSin(angle);
         }
