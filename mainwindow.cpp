@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     // check the frame size
+    std::cout << "sizeof frame is " << sizeof(FrameStructData)  << std::endl;
     if (sizeof(FrameStructData) != FRAMESIZE)
     {
     std::cout << "sizeof frame is not " << FRAMESIZE  << std::endl;

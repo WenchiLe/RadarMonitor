@@ -154,7 +154,7 @@ float RadarRadarCompareThread::FrameCompare(RadarUnitData::CarInfo carA, RadarUn
     return THRESHOLD;
     }
     diff_speed = qSqrt(qPow(carA.latVelocity, 2) + qPow(carA.longVelocity, 2)) - qSqrt(qPow(carB.latVelocity, 2) + qPow(carB.longVelocity, 2));
-    diff = diff_dis + qAbs(diff_speed) * FACTOR;
+    diff = diff_dis;// + qAbs(diff_speed) * FACTOR;
     if (diff < THRESHOLD)
     {
     return diff;
