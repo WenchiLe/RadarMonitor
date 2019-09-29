@@ -67,7 +67,7 @@ PACK(struct MagicHeader
 
 PACK(struct ScaleSetInfo
 {
-    int index;
+    int32_t index;
     float32_t max;
     float32_t min;
 });
