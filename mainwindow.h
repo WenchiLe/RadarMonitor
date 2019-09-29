@@ -24,6 +24,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include "filedownloader.h"
+#include "datatable.h"
 
 #define FRAMESIZE 12816
 
@@ -116,6 +117,8 @@ private slots:
     void ReceiveSentConfigMsg(bool flag);
     void timerUpdate();
     void loadImage();
+
+    void on_Btn_view_dataTable_clicked();
 
 signals:
     void SetConfig(QVector<SendConfig::ScaleSetInfo> ScaleSetInfoS);

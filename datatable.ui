@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DataTable</class>
+ <widget class="QDialog" name="DataTable">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1500</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <widget class="QPushButton" name="Btn_dataTable_return">
+   <property name="geometry">
+    <rect>
+     <x>1370</x>
+     <y>520</y>
+     <width>100</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>14</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>return</string>
+   </property>
+  </widget>
+  <widget class="QTableWidget" name="dataTable">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1500</width>
+     <height>500</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+    </font>
+   </property>
+   <property name="editTriggers">
+    <set>QAbstractItemView::NoEditTriggers</set>
+   </property>
+   <property name="rowCount">
+    <number>15</number>
+   </property>
+   <property name="columnCount">
+    <number>14</number>
+   </property>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <row/>
+   <column>
+    <property name="text">
+     <string>Time</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Vehicle_ID</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Frame_ID</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Total_Frames</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Local_X</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Local_Y</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>v_Length</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>v_Width</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>v_Class</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>v_Vel</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>v_Acc</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>O_Zone</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>D_Zone</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Movement</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QLabel" name="label_record_data">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>520</y>
+     <width>100</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>16</pointsize>
+    </font>
+   </property>
+   <property name="layoutDirection">
+    <enum>Qt::LeftToRight</enum>
+   </property>
+   <property name="text">
+    <string>记录数据:</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="Btn_start_record_data">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>520</y>
+     <width>100</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>16</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>start</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="Btn_stop_record_data">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>520</y>
+     <width>100</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>16</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>stop</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>Btn_dataTable_return</sender>
+   <signal>clicked()</signal>
+   <receiver>DataTable</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1393</x>
+     <y>544</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1221</x>
+     <y>546</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

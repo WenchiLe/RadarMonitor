@@ -5,6 +5,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    this->setAttribute(Qt::WA_DeleteOnClose);
+
     // check the frame size
     std::cout << "sizeof frame is " << sizeof(FrameStructData)  << std::endl;
     if (sizeof(FrameStructData) != FRAMESIZE)
@@ -451,7 +453,7 @@ void MainWindow::paintEvent(QPaintEvent *)
 
 void MainWindow::NewFramesCome(FrameStructData frame60Bs)
 {
-    //std::cout<<frame60Bs.length<<std::endl;
+    //std::cout << "main window: " << frame60Bs.length << std::endl;
     lastFrame60Bs = frame60Bs;
     update();
 }
@@ -668,4 +670,12 @@ void MainWindow::ReceiveSentConfigMsg(bool flag)
 void MainWindow::timerUpdate()
 {
     update();
+}
+
+void MainWindow::on_Btn_view_dataTable_clicked()
+{
+    DataTable *dataTable = new DataTable();
+    connect(getFramesThread, SIGNAL(FramesChanged(FrameStructData)),
+        dataTable, SLOT(NewFramesCome(FrameStructData)));
+    dataTable->show();
 }

@@ -10,6 +10,11 @@
     <height>913</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <pointsize>10</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>RadarMonitor</string>
   </property>
@@ -254,6 +259,24 @@
      <string>send</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="Btn_view_dataTable">
+    <property name="geometry">
+     <rect>
+      <x>1550</x>
+      <y>660</y>
+      <width>100</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>data</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -261,7 +284,7 @@
      <x>0</x>
      <y>0</y>
      <width>1850</width>
-     <height>23</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>

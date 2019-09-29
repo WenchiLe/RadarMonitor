@@ -41,7 +41,8 @@ SOURCES += \
     RangeSlider.cpp \
     slider.cpp \
     sendconfig.cpp \
-    filedownloader.cpp
+    filedownloader.cpp \
+    datatable.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -59,10 +60,12 @@ HEADERS += \
     slider.h \
     sendconfig.h \
     filedownloader.h \
-    basestruct.h
+    basestruct.h \
+    datatable.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    datatable.ui
 
 LIBS += -lws2_32
 
